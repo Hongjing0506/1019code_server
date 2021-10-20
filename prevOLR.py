@@ -2,7 +2,7 @@
 Author: ChenHJ
 Date: 2021-10-20 17:46:10
 LastEditors: ChenHJ
-LastEditTime: 2021-10-20 18:51:14
+LastEditTime: 2021-10-20 20:43:02
 FilePath: /chenhj/1019code/prevOLR.py
 Aim: 
 Mission: 
@@ -30,3 +30,10 @@ fromyear = 1975
 toyear = 2020
 pick_year(srcPath, dstPath, fromyear, toyear)
 # %%
+
+folr = xr.open_dataset("/home/ys17-23/chenhj/monsoon/pyear/OLR_r144x72_1975-2020.nc")
+
+fersst = xr.open_dataset("/home/ys17-23/chenhj/monsoon/pyear/ERSSTv5_r144x72_1975-2020.nc")
+
+fhadisst = xr.open_dataset("/home/ys17-23/chenhj/monsoon/pyear/HadISST_r144x72_1975-2020.nc")
+
