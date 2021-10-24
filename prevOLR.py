@@ -2,7 +2,7 @@
 Author: ChenHJ
 Date: 2021-10-20 17:46:10
 LastEditors: ChenHJ
-LastEditTime: 2021-10-23 16:50:24
+LastEditTime: 2021-10-24 21:27:20
 FilePath: /chenhj/1019code/prevOLR.py
 Aim: 
 Mission: 
@@ -38,8 +38,6 @@ from cdo import Cdo
 import shutil
 cdo = Cdo()
 
-folr = xr.open_dataset("/home/ys17-23/chenhj/monsoon/pyear/OLR_r144x72_1975-2020.nc")
-olr = folr["olr"]
 
 def p_time(data, mon_s, mon_end, meanon):
     time = data["time"]
@@ -58,7 +56,19 @@ def p_time(data, mon_s, mon_end, meanon):
         return(n_data)
     else:
         print("Bad argument: meanon")
-p_time(olr, 6, 9, False)
+
+folr = xr.open_dataset("/home/ys17-23/chenhj/monsoon/pyear/OLR_r144x72_1975-2020.nc")
+olr = folr["olr"]
+olr69 = p_time(olr, 6, 9, True)
+print(olr69)
+
+fersst = xr.open_dataset("/home/ys17-23/chenhj/monsoon/pyear/ERSSTv5_r144x72_1975-2020.nc")
+ersst = fersst["sst"]
+ersst69 = p_time(ersst, 6, 9, True)
+
+fhadisst = xr.open_dataset("/home/ys17-23/chenhj/monsoon/pyear/HadISST_r144x72_1975-2020.nc")
+hadisst = fhadisst["sst"]
+hadisst69 = p_time(hadisst, 6, 9, True)
 
 
 
