@@ -2,7 +2,7 @@
 Author: ChenHJ
 Date: 2021-10-20 17:46:10
 LastEditors: ChenHJ
-LastEditTime: 2021-10-24 21:27:20
+LastEditTime: 2021-10-24 21:46:43
 FilePath: /chenhj/1019code/prevOLR.py
 Aim: 
 Mission: 
@@ -36,6 +36,7 @@ import os
 import re
 from cdo import Cdo
 import shutil
+import proplot as plot
 cdo = Cdo()
 
 
@@ -60,7 +61,6 @@ def p_time(data, mon_s, mon_end, meanon):
 folr = xr.open_dataset("/home/ys17-23/chenhj/monsoon/pyear/OLR_r144x72_1975-2020.nc")
 olr = folr["olr"]
 olr69 = p_time(olr, 6, 9, True)
-print(olr69)
 
 fersst = xr.open_dataset("/home/ys17-23/chenhj/monsoon/pyear/ERSSTv5_r144x72_1975-2020.nc")
 ersst = fersst["sst"]
@@ -69,6 +69,7 @@ ersst69 = p_time(ersst, 6, 9, True)
 fhadisst = xr.open_dataset("/home/ys17-23/chenhj/monsoon/pyear/HadISST_r144x72_1975-2020.nc")
 hadisst = fhadisst["sst"]
 hadisst69 = p_time(hadisst, 6, 9, True)
+
 
 
 
