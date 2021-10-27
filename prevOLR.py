@@ -24,8 +24,8 @@ def pick_year(srcPath, dstPath, fromyear, toyear):
             outputfile = os.path.join(dstPath, filename[:-12] + str(fromyear) + "-" + str(toyear) + ".nc")
             cdo.selyear(str(fromyear) + r"/" + str(toyear), input = inputfile, output = outputfile)
 
-srcPath = "/home/ys17-23/chenhj/monsoon/HadISST/"
-dstPath = "/home/ys17-23/chenhj/monsoon/pyear/"
+srcPath = ch + "/home/ys17-23/chenhj/monsoon/HadISST/"
+dstPath = ch + "/home/ys17-23/chenhj/monsoon/pyear/"
 fromyear = 1975
 toyear = 2020
 pick_year(srcPath, dstPath, fromyear, toyear)
@@ -36,8 +36,10 @@ import os
 import re
 from cdo import Cdo
 import shutil
-import proplot as plot
+import proplot as pplt
+import cartopy
 cdo = Cdo()
+
 
 
 def p_time(data, mon_s, mon_end, meanon):
@@ -58,19 +60,34 @@ def p_time(data, mon_s, mon_end, meanon):
     else:
         print("Bad argument: meanon")
 
-folr = xr.open_dataset("/home/ys17-23/chenhj/monsoon/pyear/OLR_r144x72_1975-2020.nc")
+ch = "/mnt/e"
+
+folr = xr.open_dataset(ch + "/home/ys17-23/chenhj/monsoon/pyear/OLR_r144x72_1975-2020.nc")
 olr = folr["olr"]
 olr69 = p_time(olr, 6, 9, True)
 
-fersst = xr.open_dataset("/home/ys17-23/chenhj/monsoon/pyear/ERSSTv5_r144x72_1975-2020.nc")
+fersst = xr.open_dataset(ch + "/home/ys17-23/chenhj/monsoon/pyear/ERSSTv5_r144x72_1975-2020.nc")
 ersst = fersst["sst"]
 ersst69 = p_time(ersst, 6, 9, True)
+ersst69mean = ersst69.mean(dim=["time","lev"],skipna=True)
+# print(ersst69mean)
 
-fhadisst = xr.open_dataset("/home/ys17-23/chenhj/monsoon/pyear/HadISST_r144x72_1975-2020.nc")
+fhadisst = xr.open_dataset(ch + "/home/ys17-23/chenhj/monsoon/pyear/HadISST_r144x72_1975-2020.nc")
 hadisst = fhadisst["sst"]
 hadisst69 = p_time(hadisst, 6, 9, True)
 
 
+pplt.rc.reso = 'med'
+array = [[1,1,2,2],[0,3,3,0]]
+fig = pplt.figure(refwidth=1.8)
+axs = fig.subplots(array, proj='cyl')
+axs.format(abc=True, abcloc='ul', suptitle='SST & OLR',  lonlim=(40,180), latlim=(-50,40))
+m = axs[0].contourf(ersst69mean, cmap='ColdHot')
+fig.colorbar(m, loc='b', label='degree')
+fig.format(coast=True,abc='a)', abcloc='ul', abcborder=True, suptitle='SST & OLR')
 
+
+
+# %%
 
 # %%
