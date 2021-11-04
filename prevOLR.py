@@ -2,8 +2,8 @@
 Author: ChenHJ
 Date: 2021-10-20 17:46:10
 LastEditors: ChenHJ
-LastEditTime: 2021-10-24 21:46:43
-FilePath: /chenhj/1019code/prevOLR.py
+LastEditTime: 2021-11-04 21:50:41
+FilePath: /ys17-23/chenhj/1019code/prevOLR.py
 Aim: 
 Mission: 
 '''
@@ -16,6 +16,7 @@ from cdo import Cdo
 import shutil
 cdo = Cdo()
 
+ch = ""
 def pick_year(srcPath, dstPath, fromyear, toyear):
     g = os.walk(srcPath)
     for path, dir_list, file_list in g:
@@ -60,7 +61,8 @@ def p_time(data, mon_s, mon_end, meanon):
     else:
         print("Bad argument: meanon")
 
-ch = "/mnt/e"
+# ch = "/mnt/e"
+ch = ""
 
 folr = xr.open_dataset(ch + "/home/ys17-23/chenhj/monsoon/pyear/OLR_r144x72_1975-2020.nc")
 olr = folr["olr"]
@@ -81,10 +83,11 @@ pplt.rc.reso = 'med'
 array = [[1,1,2,2],[0,3,3,0]]
 fig = pplt.figure(refwidth=1.8)
 axs = fig.subplots(array, proj='cyl')
-axs.format(abc=True, abcloc='ul', suptitle='SST & OLR',  lonlim=(40,180), latlim=(-50,40))
+axs.format(coast=True, latlines=30, lonlines=60, abc=True, abcloc='ul', suptitle='SST & OLR',  lonlim=(40,180), latlim=(-50,40))
 m = axs[0].contourf(ersst69mean, cmap='ColdHot')
 fig.colorbar(m, loc='b', label='degree')
-fig.format(coast=True,abc='a)', abcloc='ul', abcborder=True, suptitle='SST & OLR')
+fig.format(abc='a)', abcloc='ul', abcborder=True, suptitle='SST & OLR')
+
 
 
 
