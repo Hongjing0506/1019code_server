@@ -99,6 +99,7 @@ fhadisst = xr.open_dataset(
 )
 hadisst = fhadisst["sst"]
 hadisst69 = p_time(hadisst, 6, 9, True)
+hadisst69mean = hadisst69.mean(dim=["time"])
 
 pplt.rc.grid = False
 pplt.rc.reso = "lo"
@@ -109,7 +110,7 @@ fig = pplt.figure(refwidth=1.8)
 
 # 以下为地理图的坐标轴设置
 proj = pplt.PlateCarree()
-axs = fig.subplots(array, proj=proj)
+axs = fig.subplots(array, proj=proj, wspace=3)
 xticks = np.array([60, 90, 120, 150, 180])
 yticks = np.array([-30, 0, 30])
 axs.format(coast=True, coastlinewidth=0.8, lonlim=(40, 180), latlim=(-50, 40))
@@ -149,8 +150,9 @@ axs.tick_params(
 axs.format(abc=True, abcloc="ul", suptitle="SST & OLR")
 
 
-m = axs[0].contourf(ersst69mean, cmap="ColdHot", extend="both")
-fig.colorbar(m, loc="b", label="degree")
+m = axs[0].contourf(ersst69mean, cmap="ColdHot", extend="both", vmin=0, vmax=30)
+axs[1].contourf(hadisst69mean, cmap="ColdHot", extend="both", vmin=0, vmax=30)
+fig.colorbar(m, loc="r", span=1, label="degree", width=0.11, ticklen=0, ticklabelsize=5)
 fig.format(abc="a)", abcloc="ul", abcborder=True, suptitle="SST & OLR")
 
 
