@@ -17,6 +17,7 @@ import shutil
 
 cdo = Cdo()
 
+# %%
 ch = ""
 
 
@@ -33,9 +34,9 @@ def pick_year(srcPath, dstPath, fromyear, toyear):
             )
 
 
-srcPath = ch + "/home/ys17-23/chenhj/monsoon/HadISST/"
+srcPath = ch + "/home/ys17-23/chenhj/monsoon/ERSSTv5/"
 dstPath = ch + "/home/ys17-23/chenhj/monsoon/pyear/"
-fromyear = 1975
+fromyear = 1979
 toyear = 2020
 pick_year(srcPath, dstPath, fromyear, toyear)
 # %%
@@ -81,13 +82,21 @@ def p_time(data, mon_s, mon_end, meanon):
 ch = ""
 
 folr = xr.open_dataset(
-    ch + "/home/ys17-23/chenhj/monsoon/pyear/OLR_r144x72_1975-2020.nc"
+    ch + "/home/ys17-23/chenhj/monsoon/pyear/OLR_r144x72_1979-2020.nc"
 )
 olr = folr["olr"]
 olr69 = p_time(olr, 6, 9, True)
+olr69mean = olr69.mean(dim="time", skipna = True)
+
+
+fpre = xr.open_dataset(ch + "/home/ys17-23/chenhj/monsoon/pyear/GPCC_r144x72_1979-2020.nc")
+pre = fpre["precip"]
+pre69 = p_time(pre, 6, 9, True)
+pre69mean = pre69.mean(dim="time", skipna = True)
+
 
 fersst = xr.open_dataset(
-    ch + "/home/ys17-23/chenhj/monsoon/pyear/ERSSTv5_r144x72_1975-2020.nc"
+    ch + "/home/ys17-23/chenhj/monsoon/pyear/ERSSTv5_r144x72_1979-2020.nc"
 )
 ersst = fersst["sst"]
 ersst69 = p_time(ersst, 6, 9, True)
@@ -95,7 +104,7 @@ ersst69mean = ersst69.mean(dim=["time", "lev"], skipna=True)
 # print(ersst69mean)
 
 fhadisst = xr.open_dataset(
-    ch + "/home/ys17-23/chenhj/monsoon/pyear/HadISST_r144x72_1975-2020.nc"
+    ch + "/home/ys17-23/chenhj/monsoon/pyear/HadISST_r144x72_1979-2020.nc"
 )
 hadisst = fhadisst["sst"]
 hadisst69 = p_time(hadisst, 6, 9, True)
@@ -105,12 +114,12 @@ pplt.rc.grid = False
 pplt.rc.reso = "lo"
 
 
-array = [[1, 1, 2, 2], [0, 3, 3, 0]]
+# array = [1, 1, 2, 2]
 fig = pplt.figure(refwidth=1.8)
 
 # 以下为地理图的坐标轴设置
 proj = pplt.PlateCarree()
-axs = fig.subplots(array, proj=proj, wspace=3)
+axs = fig.subplots(ncols=2, nrows=1, proj=proj, wspace=3)
 xticks = np.array([60, 90, 120, 150, 180])
 yticks = np.array([-30, 0, 30])
 axs.format(coast=True, coastlinewidth=0.8, lonlim=(40, 180), latlim=(-50, 40))
@@ -150,9 +159,11 @@ axs.tick_params(
 axs.format(abc=True, abcloc="ul", suptitle="SST & OLR")
 
 
-m = axs[0].contourf(ersst69mean, cmap="ColdHot", extend="both", vmin=0, vmax=30)
-axs[1].contourf(hadisst69mean, cmap="ColdHot", extend="both", vmin=0, vmax=30)
-fig.colorbar(m, loc="r", span=1, label="degree", width=0.11, ticklen=0, ticklabelsize=5)
+m = axs[0].contourf(olr69mean, cmap="ColdHot", extend="both", vmin=180, vmax=300)
+fig.colorbar(m, loc="b", span=1, label="W/m^2", width=0.11, ticklen=0, ticklabelsize=5)
+m = axs[1].contourf(pre69mean, cmap="ColdHot", extend="both", vmin=0, vmax=15)
+fig.colorbar(m, loc="b", span=2, label="mm/day", width=0.11, ticklen=0, ticklabelsize=5)
+# fig.colorbar(m, loc="r", span=1, label="degree", width=0.11, ticklen=0, ticklabelsize=5)
 fig.format(abc="a)", abcloc="ul", abcborder=True, suptitle="SST & OLR")
 
 

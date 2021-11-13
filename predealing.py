@@ -2,8 +2,8 @@
 Author: ChenHJ
 Date: 2021-10-19 16:08:44
 LastEditors: ChenHJ
-LastEditTime: 2021-10-19 18:03:56
-FilePath: /1019coderepositories/predealing.py
+LastEditTime: 2021-11-13 15:43:45
+FilePath: /chenhj/1019code/predealing.py
 Aim: 
 Mission: 
 '''
@@ -15,6 +15,8 @@ import re
 from cdo import Cdo
 import shutil
 cdo = Cdo()
+
+# %%
 
 def predealing(srcPath, tmpPath, dstPath, name):
     if os.path.isdir(dstPath):
@@ -48,4 +50,14 @@ tmpPath = str1 + str2 + "tmp/"
 dstPath = str1 + str3 + str4
 name = "ERSSTv5_r144x72_1870-2020.nc"
 predealing(srcPath, tmpPath, dstPath, name)
+# %%
+
+
+file = xr.open_dataset("/home/ys17-23/chenhj/monsoon/precip.mon.mean.nc")
+var = file['precip']
+tmppath = "/home/ys17-23/chenhj/monsoon/tmp.nc"
+dstpath = "/home/ys17-23/chenhj/monsoon/pyear/GPCC_r144x72_1979-2020.nc"
+var.to_netcdf(tmppath)
+print(var)
+cdo.remapbil("r144x72", input = "-selyear,1979" + r"/" + "2020 " + tmppath, output = dstpath)
 # %%
