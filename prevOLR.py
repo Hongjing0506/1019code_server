@@ -84,14 +84,18 @@ ch = ""
 folr = xr.open_dataset(
     ch + "/home/ys17-23/chenhj/monsoon/pyear/OLR_r144x72_1979-2020.nc"
 )
+
+startmon = 6
+endmon = startmon
+
 olr = folr["olr"]
-olr69 = p_time(olr, 6, 9, True)
+olr69 = p_time(olr, startmon, endmon, True)
 olr69mean = olr69.mean(dim="time", skipna = True)
 
 
 fpre = xr.open_dataset(ch + "/home/ys17-23/chenhj/monsoon/pyear/GPCC_r144x72_1979-2020.nc")
 pre = fpre["precip"]
-pre69 = p_time(pre, 6, 9, True)
+pre69 = p_time(pre, startmon, endmon, True)
 pre69mean = pre69.mean(dim="time", skipna = True)
 
 
@@ -170,5 +174,7 @@ fig.format(abc="a)", abcloc="ul", abcborder=True, suptitle="SST & OLR")
 pplt.rc.reset()
 
 # %%
+
+
 
 # %%
