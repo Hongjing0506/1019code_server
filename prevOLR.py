@@ -268,7 +268,7 @@ axs = fig.subplots(ncols = 2, nrows = 2)
 axs[0].plot(olr_ac_a)
 axs[1].plot(pre_ac_a)
 
-axs.format(xlocator=np.arange(1,13))
+axs.format(xlocator=np.arange(1,13), grid = False, tickminor = False)
 
 
 # %%
