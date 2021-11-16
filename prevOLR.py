@@ -247,6 +247,9 @@ olr = folr["olr"]
 olr_ac = cal_annual_a(olr)
 #area_a: 5°N-20°N, 60°E-75°E
 olr_ac_a = olr_ac.loc[:,5:20,60:75].mean(dim=["lat","lon"])
+
+#area_b: 5°N-20°N, 50°E-60°E
+olr_ac_b = olr_ac.loc[:,5:20,50:60].mean(dim=["lat","lon"])
 # print(olr_ac_a)
 # olr_p = p_time(olr, startmon, endmon, True)
 
@@ -256,6 +259,7 @@ fpre = xr.open_dataset(
 pre = fpre["precip"]
 pre_ac = cal_annual_a(pre)
 pre_ac_a = pre_ac.loc[:,5:20,60:75].mean(dim=["lat","lon"])
+pre_ac_b = pre_ac.loc[:,5:20,50:60].mean(dim=["lat","lon"])
 # print(pre_ac)
 
 
@@ -265,10 +269,21 @@ pre_ac_a = pre_ac.loc[:,5:20,60:75].mean(dim=["lat","lon"])
 # %%
 fig = pplt.figure(refwidth = 1.8, span = False, share = False)
 axs = fig.subplots(ncols = 2, nrows = 2)
-axs[0].plot(olr_ac_a)
-axs[1].plot(pre_ac_a)
+axs[0].plot(olr_ac_a, zorder = 0)
+axs[0].scatter(olr_ac_a, marker = 'x', zorder = 1)
+axs[0].format(ylim = (-35,35), ylocator = 10, title = 'OLR', urtitle = '5°N-20°N\n60°E-75°E', ylabel = 'W/m^2')
+axs[1].plot(pre_ac_a, zorder = 0)
+axs[1].scatter(pre_ac_a, marker = 'x', zorder = 1)
+axs[1].format(ylim = (-4,4), ylocator = 1, title = 'Precip', urtitle = '5°N-20°N\n60°E-75°E', ylabel = 'mm/day')
 
-axs.format(xlocator=np.arange(1,13), grid = False, tickminor = False)
+axs[2].plot(olr_ac_b, zorder = 0)
+axs[2].scatter(olr_ac_b, marker = 'x', zorder = 1)
+axs[2].format(ylim = (-35,35), ylocator = 10, title = 'OLR', urtitle = '5°N-20°N\n50°E-60°E', ylabel = 'W/m^2')
+axs[3].plot(pre_ac_b, zorder = 0)
+axs[3].scatter(pre_ac_b, marker = 'x', zorder = 1)
+axs[3].format(ylim = (-4,4), ylocator = 1, title = 'Precip', urtitle = '5°N-20°N\n50°E-60°E', ylabel = 'mm/day')
+
+axs.format(xlocator=np.arange(1,13), grid = False, tickminor = False, abc = 'a)', abcloc = 'ul')
 
 
 # %%
