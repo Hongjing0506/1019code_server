@@ -306,3 +306,64 @@ pre_ar = premax_sum - premin_sum
 
 
 # %%
+pplt.rc.grid = False
+pplt.rc.reso = "lo"
+
+
+# array = [1, 1, 2, 2]
+fig = pplt.figure(refwidth=1.8)
+
+# 以下为地理图的坐标轴设置
+proj = pplt.PlateCarree()
+axs = fig.subplots(ncols=2, nrows=2, proj=proj, wspace=3)
+xticks = np.array([40, 55, 70, 85, 100, 115])
+yticks = np.array([-10, 0, 10, 20, 30])
+axs.format(coast=True, coastlinewidth=0.8, lonlim=(40, 120), latlim=(-10, 30))
+axs.set_xticks(xticks)
+axs.set_yticks(yticks)
+lon_formatter = LongitudeFormatter(zero_direction_label=True)
+lat_formatter = LatitudeFormatter()
+axs.minorticks_on()
+xminorLocator = MultipleLocator(5)
+yminorLocator = MultipleLocator(5)
+for ax in axs:
+    ax.xaxis.set_major_formatter(lon_formatter)
+    ax.yaxis.set_major_formatter(lat_formatter)
+    ax.xaxis.set_minor_locator(xminorLocator)
+    ax.yaxis.set_minor_locator(yminorLocator)
+    ax.outline_patch.set_linewidth(1.0)
+axs.tick_params(
+    axis="both",
+    which="major",
+    labelsize=8,
+    direction="out",
+    length=3,
+    width=0.8,
+    pad=0.2,
+    top=True,
+    right=True,
+)
+axs.tick_params(
+    axis="both",
+    which="minor",
+    direction="out",
+    length=2,
+    width=0.8,
+    top=True,
+    right=True,
+)
+axs.format(abc=True, abcloc="ul", suptitle="SST & OLR")
+
+
+m = axs[0].pcolormesh(premaxidx, cmap="ColdHot", vmin = 1, vmax = 12)
+m = axs[1].pcolormesh(preminidx, cmap="ColdHot", vmin = 1, vmax = 12)
+fig.colorbar(m, loc="r", span=1, label="month", width=0.11, ticklen=0, ticklabelsize=5)
+m = axs[2].contourf(pre_ar, cmap = "ColdHot", vmin = 0,vmax = 45, extend = "both")
+fig.colorbar(m, loc="r", span=2, label="mm/day", width=0.11, ticklen=0, ticklabelsize=5)
+# fig.colorbar(m, loc="b", span=2, label="mm/day", width=0.11, ticklen=0, ticklabelsize=5)
+# fig.colorbar(m, loc="r", span=1, label="degree", width=0.11, ticklen=0, ticklabelsize=5)
+fig.format(abc="a)", abcloc="ul", abcborder=True, suptitle="annual range")
+
+
+pplt.rc.reset()
+# %%
