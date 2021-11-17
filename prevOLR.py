@@ -279,5 +279,15 @@ axs.format(xlocator=np.arange(1,13), grid = False, tickminor = False, abc = 'a)'
 
 
 # %%
+ch = ""
+fpre = xr.open_dataset(
+    ch + "/home/ys17-23/chenhj/monsoon/pyear/GPCC_r144x72_1979-2020.nc"
+)
+pre = fpre["precip"]
+pre_m = pre.groupby("time.month").mean()
+premaxidx = pre_m.idxmax(dim = "month", skipna = True)
+preminidx = pre_m.idxmin(dim = "month", skipna = True)
+
+
 
 # %%
