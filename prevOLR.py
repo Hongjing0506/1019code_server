@@ -288,6 +288,21 @@ pre_m = pre.groupby("time.month").mean()
 premaxidx = pre_m.idxmax(dim = "month", skipna = True)
 preminidx = pre_m.idxmin(dim = "month", skipna = True)
 
+premaxn1 = premaxidx - 1
+premaxn1 = xr.where(premaxn1 == 0, 12, premaxn1)
+premaxn3 = premaxidx + 1
+premaxn3 = xr.where(premaxn3 == 13, 1, premaxn3)
+
+premax_sum = pre_m.sel(month = premaxn1) + pre_m.sel(month = premaxidx) + pre_m.sel(month = premaxn3)
+
+preminn1 = preminidx - 1
+preminn1 = xr.where(preminn1 == 0, 12, preminn1)
+preminn3 = preminidx + 1
+preminn3 = xr.where(preminn3 == 13, 1, preminn3)
+
+premin_sum = pre_m.sel(month = preminn1) + pre_m.sel(month = preminidx) + pre_m.sel(month = preminn3)
+
+pre_ar = premax_sum - premin_sum
 
 
 # %%
