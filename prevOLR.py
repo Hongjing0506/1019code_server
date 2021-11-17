@@ -46,16 +46,8 @@ return {*}
 
 def p_time(data, mon_s, mon_end, meanon):
     time = data["time"]
-    n_year = int(len(time) / 12)
+    n_data = data.sel(time=(data.time.dt.month<=mon_end)*(data.time.dt.month>=mon_s))
     n_mon = mon_end - mon_s + 1
-    plist = np.zeros(n_mon * n_year, dtype=np.int64)
-    for i in np.arange(0, n_year):
-        plist[n_mon * i : n_mon * (i + 1)] = np.arange(
-            mon_s - 1, mon_end, dtype=np.int64
-        )
-        plist[n_mon * i : n_mon * (i + 1)] += 12 * i
-    n_data = data.sel(time=time[plist], method=None)
-    # print(n_data)
     if meanon == True:
         n_data_mean = n_data.coarsen(time=n_mon).mean()
         return n_data_mean
@@ -285,5 +277,7 @@ axs[3].format(ylim = (-4,4), ylocator = 1, title = 'Precip', urtitle = '5Â°N-20Â
 
 axs.format(xlocator=np.arange(1,13), grid = False, tickminor = False, abc = 'a)', abcloc = 'ul')
 
+
+# %%
 
 # %%
