@@ -303,6 +303,14 @@ preminn3 = xr.where(preminn3 == 13, 1, preminn3)
 premin_sum = pre_m.sel(month = preminn1) + pre_m.sel(month = preminidx) + pre_m.sel(month = preminn3)
 
 pre_ar = premax_sum - premin_sum
+pre_ar = pre_ar / 3
+
+pre_DJF = pre_m[0] + pre_m[1] + pre_m[11]
+pre_JJA = pre_m[5] + pre_m[6] + pre_m[7]
+
+pre_arWD = pre_JJA - pre_DJF
+pre_arWD = xr.where(pre_arWD.lat < 0, (-1 * pre_arWD), pre_arWD)
+pre_arWD = pre_arWD / 3.0
 
 
 # %%
@@ -358,7 +366,8 @@ axs.format(abc=True, abcloc="ul", suptitle="SST & OLR")
 m = axs[0].pcolormesh(premaxidx, cmap="ColdHot", vmin = 1, vmax = 12)
 m = axs[1].pcolormesh(preminidx, cmap="ColdHot", vmin = 1, vmax = 12)
 fig.colorbar(m, loc="r", span=1, label="month", width=0.11, ticklen=0, ticklabelsize=5)
-m = axs[2].contourf(pre_ar, cmap = "ColdHot", vmin = 0,vmax = 45, extend = "both")
+m = axs[2].contourf(pre_ar, cmap = "ColdHot", vmin = -12,vmax = 12, extend = "both")
+m = axs[3].contourf(pre_arWD, cmap = "ColdHot", vmin = -12, vmax = 12, extend = "both")
 fig.colorbar(m, loc="r", span=2, label="mm/day", width=0.11, ticklen=0, ticklabelsize=5)
 # fig.colorbar(m, loc="b", span=2, label="mm/day", width=0.11, ticklen=0, ticklabelsize=5)
 # fig.colorbar(m, loc="r", span=1, label="degree", width=0.11, ticklen=0, ticklabelsize=5)
