@@ -2,7 +2,7 @@
 Author: ChenHJ
 Date: 2021-11-22 16:33:19
 LastEditors: ChenHJ
-LastEditTime: 2021-11-22 18:16:08
+LastEditTime: 2021-11-22 18:23:10
 FilePath: /ys17-23/chenhj/1019code/monsoon_area.py
 Aim: 
 Mission: 
@@ -122,7 +122,7 @@ pplt.rc.reso = "lo"
 
 
 # array = [1, 1, 2, 2]
-fig = pplt.figure(refwidth=1.8)
+fig = pplt.figure()
 
 # 以下为地理图的坐标轴设置
 proj = pplt.PlateCarree()
@@ -165,15 +165,17 @@ axs.tick_params(
 )
 
 
-m = axs[0].contourf(pre_59sum, cmap="Greys", colorbar = "b", colorbar_kw = {"ticklen": 0, "ticklabelsize": 5, "width": 0.11})
+axs[0].contourf(pre_59sum, cmap="Greys", colorbar = "b", colorbar_kw = {"ticklen": 0, "ticklabelsize": 5, "width": 0.11})
 axs.format(title = "Total Rainfall May to Sep")
+axs[0].contour()
 # axs.colorbar(m, ticklen = 0, ticklabelsize = 5)
-m = axs[1].contourf(pre_ar, cmap="Greys", vmin = 5, vmax = 17, colorbar = "b", colorbar_kw = {"ticklen": 0, "ticklabelsize": 5, "width": 0.11})
+axs[1].contourf(pre_ar, cmap="Greys", vmin = 5, vmax = 17, colorbar = "b", colorbar_kw = {"ticklen": 0, "ticklabelsize": 5, "width": 0.11})
 # axs.colorbar(m, ticklen = 0, ticklabelsize = 5)
 # fig.colorbar(m, loc="b", span=1, label="month", width=0.11, ticklen=0, ticklabelsize=5)
-m = axs[2].contourf(pre_ratio, cmap = "Greys", vmin = 0,vmax = 1, extend = "both", colorbar = "b", colorbar_kw = {"ticklen": 0, "ticklabelsize": 5, "width": 0.11})
+axs[2].contourf(pre_ratio, cmap = "Greys", vmin = 0,vmax = 1, extend = "both", colorbar = "b", colorbar_kw = {"ticklen": 0, "ticklabelsize": 5, "width": 0.11})
 # axs.colorbar(m, ticklen = 0, ticklabelsize = 5)
-m = axs[3].contourf(pre_RR, cmap = "Purples1", vmin = 5, vmax = 18, extend = "max", colorbar = "b", colorbar_kw = {"ticklen": 0, "ticklabelsize": 5, "width": 0.11})
+axs[3].contourf(pre_RR, cmap = "Greys", vmin = 0, vmax = 18, extend = "max", colorbar = "b", colorbar_kw = {"ticklen": 0, "ticklabelsize": 5, "width": 0.11})
+axs[3].contour(pre_RR, c = "black", vmin = 5, vmax = 5)
 # axs.colorbar(m, ticklen = 0, ticklabelsize = 5)
 # fig.colorbar(m, loc="b", span=2, label="mm/day", width=0.11, ticklen=0, ticklabelsize=5)
 # fig.colorbar(m, loc="b", span=2, label="mm/day", width=0.11, ticklen=0, ticklabelsize=5)
