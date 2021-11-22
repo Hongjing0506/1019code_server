@@ -2,7 +2,7 @@
 Author: ChenHJ
 Date: 2021-11-22 16:33:19
 LastEditors: ChenHJ
-LastEditTime: 2021-11-22 16:58:36
+LastEditTime: 2021-11-22 17:22:54
 FilePath: /ys17-23/chenhj/1019code/monsoon_area.py
 Aim: 
 Mission: 
@@ -97,6 +97,12 @@ pre = fpre["precip"]
 # %%
 #   计算Total Rainfall May to Sep(mm/day)
 pre_59sum = p_time(pre, 5, 9, False).sum(dim = "time", skipna = True) / 42.0
-pre_59sum_in = pre_59sum.loc[0:20, 40:180]
+
+
+# %%
+#   计算Annual range (mm/day)
+pre_ac = p_month(pre, 1, 12).mean(dim = "time")
+pre_ar = pre_ac.max(dim = "month", skipna = True) - pre_ac.min(dim = "month", skipna = True)
+
 
 # %%
