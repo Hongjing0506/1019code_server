@@ -113,7 +113,8 @@ pre_ratio = pre_59sum / pre_y
 # %%
 #   计算RR index = R_i - R_J
 pre_Jan = pre.groupby("time.month")[1].mean(dim = "time", skipna = True)
-pre_max = pre_ac.max(dim = "month", skipna = True) - pre_Jan
+pre_max = pre_ac.max(dim = "month", skipna = True)
+pre_RR = pre_max - pre_Jan
 # %%
 #   画图
 pplt.rc.grid = False
