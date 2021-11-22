@@ -2,7 +2,7 @@
 Author: ChenHJ
 Date: 2021-11-22 16:33:19
 LastEditors: ChenHJ
-LastEditTime: 2021-11-22 17:25:23
+LastEditTime: 2021-11-22 18:16:08
 FilePath: /ys17-23/chenhj/1019code/monsoon_area.py
 Aim: 
 Mission: 
@@ -96,7 +96,7 @@ pre = fpre["precip"]
 
 # %%
 #   计算Total Rainfall May to Sep(mm/day)
-pre_59sum = p_time(pre, 5, 9, False).sum(dim = "time", skipna = True) / 42.0
+pre_59sum = p_time(pre, 5, 9, False).sum(dim = "time") / 42.0
 
 
 # %%
@@ -119,3 +119,67 @@ pre_RR = pre_max - pre_Jan
 #   画图
 pplt.rc.grid = False
 pplt.rc.reso = "lo"
+
+
+# array = [1, 1, 2, 2]
+fig = pplt.figure(refwidth=1.8)
+
+# 以下为地理图的坐标轴设置
+proj = pplt.PlateCarree()
+axs = fig.subplots(ncols=2, nrows=2, proj=proj, wspace=3)
+xticks = np.array([40, 60, 80, 100, 120, 140, 160, 180])
+yticks = np.array([0, 10, 20, 30, 40, 50])
+axs.format(coast=True, coastlinewidth=0.8, lonlim=(40, 180), latlim=(0, 50))
+axs.set_xticks(xticks)
+axs.set_yticks(yticks)
+lon_formatter = LongitudeFormatter(zero_direction_label=True)
+lat_formatter = LatitudeFormatter()
+axs.minorticks_on()
+xminorLocator = MultipleLocator(5)
+yminorLocator = MultipleLocator(10)
+for ax in axs:
+    ax.xaxis.set_major_formatter(lon_formatter)
+    ax.yaxis.set_major_formatter(lat_formatter)
+    ax.xaxis.set_minor_locator(xminorLocator)
+    ax.yaxis.set_minor_locator(yminorLocator)
+    ax.outline_patch.set_linewidth(1.0)
+axs.tick_params(
+    axis="both",
+    which="major",
+    labelsize=8,
+    direction="out",
+    length=3,
+    width=0.8,
+    pad=0.2,
+    top=True,
+    right=True,
+)
+axs.tick_params(
+    axis="both",
+    which="minor",
+    direction="out",
+    length=2,
+    width=0.8,
+    top=True,
+    right=True,
+)
+
+
+m = axs[0].contourf(pre_59sum, cmap="Greys", colorbar = "b", colorbar_kw = {"ticklen": 0, "ticklabelsize": 5, "width": 0.11})
+axs.format(title = "Total Rainfall May to Sep")
+# axs.colorbar(m, ticklen = 0, ticklabelsize = 5)
+m = axs[1].contourf(pre_ar, cmap="Greys", vmin = 5, vmax = 17, colorbar = "b", colorbar_kw = {"ticklen": 0, "ticklabelsize": 5, "width": 0.11})
+# axs.colorbar(m, ticklen = 0, ticklabelsize = 5)
+# fig.colorbar(m, loc="b", span=1, label="month", width=0.11, ticklen=0, ticklabelsize=5)
+m = axs[2].contourf(pre_ratio, cmap = "Greys", vmin = 0,vmax = 1, extend = "both", colorbar = "b", colorbar_kw = {"ticklen": 0, "ticklabelsize": 5, "width": 0.11})
+# axs.colorbar(m, ticklen = 0, ticklabelsize = 5)
+m = axs[3].contourf(pre_RR, cmap = "Purples1", vmin = 5, vmax = 18, extend = "max", colorbar = "b", colorbar_kw = {"ticklen": 0, "ticklabelsize": 5, "width": 0.11})
+# axs.colorbar(m, ticklen = 0, ticklabelsize = 5)
+# fig.colorbar(m, loc="b", span=2, label="mm/day", width=0.11, ticklen=0, ticklabelsize=5)
+# fig.colorbar(m, loc="b", span=2, label="mm/day", width=0.11, ticklen=0, ticklabelsize=5)
+# fig.colorbar(m, loc="r", span=1, label="degree", width=0.11, ticklen=0, ticklabelsize=5)
+fig.format(abc="a)", abcloc="ul", abcborder=True, title = "Monsoon Annual Range")
+
+
+pplt.rc.reset()
+# %%
