@@ -2,7 +2,7 @@
 Author: ChenHJ
 Date: 2021-11-22 16:33:19
 LastEditors: ChenHJ
-LastEditTime: 2021-11-22 17:22:54
+LastEditTime: 2021-11-22 17:25:23
 FilePath: /ys17-23/chenhj/1019code/monsoon_area.py
 Aim: 
 Mission: 
@@ -104,5 +104,10 @@ pre_59sum = p_time(pre, 5, 9, False).sum(dim = "time", skipna = True) / 42.0
 pre_ac = p_month(pre, 1, 12).mean(dim = "time")
 pre_ar = pre_ac.max(dim = "month", skipna = True) - pre_ac.min(dim = "month", skipna = True)
 
+
+# %%
+#   计算Rainfall ratio of (May to Sep)/year )(%)
+pre_y = pre_ac.sum(dim = "month", skipna = True)
+pre_ratio = pre_59sum / pre_y
 
 # %%
