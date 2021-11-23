@@ -213,3 +213,76 @@ erapre_Jan = era.loc[1:6, :, :, :].mean(dim = "year", skipna = True).sum(dim = "
 erapre_max = erapre_ac.max(dim = "pentad", skipna = True)
 erapre_RR = erapre_max - erapre_Jan
 # %%
+#   plot
+pplt.rc.grid = False
+pplt.rc.reso = "lo"
+
+
+# array = [1, 1, 2, 2]
+fig = pplt.figure()
+
+# 以下为地理图的坐标轴设置
+proj = pplt.PlateCarree()
+axs = fig.subplots(ncols=2, nrows=2, proj=proj, wspace=4.0, hspace = 4.0)
+xticks = np.array([40, 60, 80, 100, 120, 140, 160, 180])
+yticks = np.array([0, 10, 20, 30, 40, 50])
+axs.format(coast=True, coastlinewidth=0.8, lonlim=(40, 180), latlim=(0, 50))
+axs.set_xticks(xticks)
+axs.set_yticks(yticks)
+lon_formatter = LongitudeFormatter(zero_direction_label=True)
+lat_formatter = LatitudeFormatter()
+axs.minorticks_on()
+xminorLocator = MultipleLocator(5)
+yminorLocator = MultipleLocator(10)
+for ax in axs:
+    ax.xaxis.set_major_formatter(lon_formatter)
+    ax.yaxis.set_major_formatter(lat_formatter)
+    ax.xaxis.set_minor_locator(xminorLocator)
+    ax.yaxis.set_minor_locator(yminorLocator)
+    ax.outline_patch.set_linewidth(1.0)
+axs.tick_params(
+    axis="both",
+    which="major",
+    labelsize=8,
+    direction="out",
+    length=4.0,
+    width=0.8,
+    pad=2.0,
+    top=False,
+    right=False,
+)
+axs.tick_params(
+    axis="both",
+    which="minor",
+    direction="out",
+    length=3.0,
+    width=0.8,
+    top=False,
+    right=False,
+)
+
+
+axs[0].contourf(erapre_59sum, cmap="Greys", colorbar = "b", colorbar_kw = {"ticklen": 0, "ticklabelsize": 5, "width": 0.11, "label": ""}, extend = "both", vmin = 2.0, vmax = 17.0, levels = np.arange(2.0, 18.0, 3.0))
+axs[0].format(title = "Total Rainfall May to Sep", titleloc = 'l', rtitle = "mm/day")
+axs[0].contour(erapre_59sum, c = "black", vmin = 2.0, vmax = 2.0, lw = 1.0)
+# axs.colorbar(m, ticklen = 0, ticklabelsize = 5)
+axs[1].contourf(erapre_ar, cmap="Greys", vmin = 5, vmax = 17, colorbar = "b", colorbar_kw = {"ticklen": 0, "ticklabelsize": 5, "width": 0.11, "label": ""}, extend = "both", levels = np.arange(5.0, 18.0, 2.0))
+axs[1].format(title = "Annual range", titleloc = 'l', rtitle = "mm/day")
+# axs.colorbar(m, ticklen = 0, ticklabelsize = 5)
+# fig.colorbar(m, loc="b", span=1, label="month", width=0.11, ticklen=0, ticklabelsize=5)
+axs[2].contourf(erapre_ratio, cmap = "Greys", vmin = 0, vmax = 1, extend = "both", colorbar = "b", colorbar_kw = {"ticklen": 0, "ticklabelsize": 5, "width": 0.11, "label": ""})
+axs[2].contour(erapre_ratio, c = "black", vmin = 0.55, vmax = 0.55, lw = 1.0)
+axs[2].format(title = "Rainfall ratio of (May to Sep)/year", titleloc = 'l', rtitle = "%")
+# axs.colorbar(m, ticklen = 0, ticklabelsize = 5)
+axs[3].contourf(erapre_RR, cmap = "Greys", vmin = 0, vmax = 18, values = np.arange(0.0, 19.0, 1.0), extend = "both", colorbar = "b", colorbar_kw = {"ticklen": 0, "ticklabelsize": 5, "width": 0.11, "label": ""})
+axs[3].contour(erapre_RR, c = "black", vmin = 5, vmax = 5, lw = 1.0)
+axs[3].format(title = "Monsoon Annual Range", titleloc = 'l', rtitle = "mm/day")
+# axs.colorbar(m, ticklen = 0, ticklabelsize = 5)
+# fig.colorbar(m, loc="b", span=2, label="mm/day", width=0.11, ticklen=0, ticklabelsize=5)
+# fig.colorbar(m, loc="b", span=2, label="mm/day", width=0.11, ticklen=0, ticklabelsize=5)
+# fig.colorbar(m, loc="r", span=1, label="degree", width=0.11, ticklen=0, ticklabelsize=5)
+fig.format(abc="a)", abcloc="l", abcborder=True, suptitle = "Monsoon Annual Range")
+
+
+pplt.rc.reset()
+# %%
