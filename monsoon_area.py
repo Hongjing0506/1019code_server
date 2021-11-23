@@ -189,3 +189,10 @@ fig.format(abc="a)", abcloc="l", abcborder=True, suptitle = "Monsoon Annual Rang
 
 pplt.rc.reset()
 # %%
+#   Reading the ERA5 data
+ch = ""
+ferapre = xr.open_dataset(ch + "/home/ys17-23/chenhj/monsoon/pyear/pensyn_tp.197901-201412.nc")
+era = ferapre["tp"]
+era = era * 1000.0 * 24.0
+
+# %%
