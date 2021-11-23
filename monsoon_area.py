@@ -2,7 +2,7 @@
 Author: ChenHJ
 Date: 2021-11-22 16:33:19
 LastEditors: ChenHJ
-LastEditTime: 2021-11-22 18:23:10
+LastEditTime: 2021-11-23 17:41:18
 FilePath: /ys17-23/chenhj/1019code/monsoon_area.py
 Aim: 
 Mission: 
@@ -96,7 +96,7 @@ pre = fpre["precip"]
 
 # %%
 #   计算Total Rainfall May to Sep(mm/day)
-pre_59sum = p_time(pre, 5, 9, False).sum(dim = "time") / 42.0
+pre_59sum = p_time(pre, 5, 9, False).sum(dim = "time") / 42.0 / 5.0
 
 
 # %%
@@ -126,7 +126,7 @@ fig = pplt.figure()
 
 # 以下为地理图的坐标轴设置
 proj = pplt.PlateCarree()
-axs = fig.subplots(ncols=2, nrows=2, proj=proj, wspace=3)
+axs = fig.subplots(ncols=2, nrows=2, proj=proj, wspace=4.0, hspace = 4.0)
 xticks = np.array([40, 60, 80, 100, 120, 140, 160, 180])
 yticks = np.array([0, 10, 20, 30, 40, 50])
 axs.format(coast=True, coastlinewidth=0.8, lonlim=(40, 180), latlim=(0, 50))
@@ -148,39 +148,43 @@ axs.tick_params(
     which="major",
     labelsize=8,
     direction="out",
-    length=3,
+    length=4.0,
     width=0.8,
-    pad=0.2,
-    top=True,
-    right=True,
+    pad=2.0,
+    top=False,
+    right=False,
 )
 axs.tick_params(
     axis="both",
     which="minor",
     direction="out",
-    length=2,
+    length=3.0,
     width=0.8,
-    top=True,
-    right=True,
+    top=False,
+    right=False,
 )
 
 
-axs[0].contourf(pre_59sum, cmap="Greys", colorbar = "b", colorbar_kw = {"ticklen": 0, "ticklabelsize": 5, "width": 0.11})
-axs.format(title = "Total Rainfall May to Sep")
-axs[0].contour()
+axs[0].contourf(pre_59sum, cmap="Greys", colorbar = "b", colorbar_kw = {"ticklen": 0, "ticklabelsize": 5, "width": 0.11, "label": ""}, extend = "both", vmin = 2.0, vmax = 17.0, levels = np.arange(2.0, 18.0, 3.0))
+axs[0].format(title = "Total Rainfall May to Sep", titleloc = 'l', rtitle = "mm/day")
+axs[0].contour(pre_59sum, c = "black", vmin = 2.0, vmax = 2.0, lw = 1.0)
 # axs.colorbar(m, ticklen = 0, ticklabelsize = 5)
-axs[1].contourf(pre_ar, cmap="Greys", vmin = 5, vmax = 17, colorbar = "b", colorbar_kw = {"ticklen": 0, "ticklabelsize": 5, "width": 0.11})
+axs[1].contourf(pre_ar, cmap="Greys", vmin = 5, vmax = 17, colorbar = "b", colorbar_kw = {"ticklen": 0, "ticklabelsize": 5, "width": 0.11, "label": ""}, extend = "both", levels = np.arange(5.0, 18.0, 2.0))
+axs[1].format(title = "Annual range", titleloc = 'l', rtitle = "mm/day")
 # axs.colorbar(m, ticklen = 0, ticklabelsize = 5)
 # fig.colorbar(m, loc="b", span=1, label="month", width=0.11, ticklen=0, ticklabelsize=5)
-axs[2].contourf(pre_ratio, cmap = "Greys", vmin = 0,vmax = 1, extend = "both", colorbar = "b", colorbar_kw = {"ticklen": 0, "ticklabelsize": 5, "width": 0.11})
+axs[2].contourf(pre_ratio, cmap = "Greys", vmin = 0, vmax = 1, extend = "both", colorbar = "b", colorbar_kw = {"ticklen": 0, "ticklabelsize": 5, "width": 0.11, "label": ""})
+axs[2].contour(pre_ratio, c = "black", vmin = 0.55, vmax = 0.55, lw = 1.0)
+axs[2].format(title = "Rainfall ratio of (May to Sep)/year", titleloc = 'l', rtitle = "%")
 # axs.colorbar(m, ticklen = 0, ticklabelsize = 5)
-axs[3].contourf(pre_RR, cmap = "Greys", vmin = 0, vmax = 18, extend = "max", colorbar = "b", colorbar_kw = {"ticklen": 0, "ticklabelsize": 5, "width": 0.11})
-axs[3].contour(pre_RR, c = "black", vmin = 5, vmax = 5)
+axs[3].contourf(pre_RR, cmap = "Greys", vmin = 0, vmax = 18, values = np.arange(0.0, 19.0, 1.0), extend = "both", colorbar = "b", colorbar_kw = {"ticklen": 0, "ticklabelsize": 5, "width": 0.11, "label": ""})
+axs[3].contour(pre_RR, c = "black", vmin = 5, vmax = 5, lw = 1.0)
+axs[3].format(title = "Monsoon Annual Range", titleloc = 'l', rtitle = "mm/day")
 # axs.colorbar(m, ticklen = 0, ticklabelsize = 5)
 # fig.colorbar(m, loc="b", span=2, label="mm/day", width=0.11, ticklen=0, ticklabelsize=5)
 # fig.colorbar(m, loc="b", span=2, label="mm/day", width=0.11, ticklen=0, ticklabelsize=5)
 # fig.colorbar(m, loc="r", span=1, label="degree", width=0.11, ticklen=0, ticklabelsize=5)
-fig.format(abc="a)", abcloc="ul", abcborder=True, title = "Monsoon Annual Range")
+fig.format(abc="a)", abcloc="l", abcborder=True, suptitle = "Monsoon Annual Range")
 
 
 pplt.rc.reset()
