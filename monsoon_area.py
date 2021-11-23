@@ -2,7 +2,7 @@
 Author: ChenHJ
 Date: 2021-11-22 16:33:19
 LastEditors: ChenHJ
-LastEditTime: 2021-11-23 21:23:36
+LastEditTime: 2021-11-23 21:25:36
 FilePath: /ys17-23/chenhj/1019code/monsoon_area.py
 Aim: 
 Mission: 
@@ -196,9 +196,7 @@ era = ferapre["tp"]
 era = era * 1000.0 * 24.0
 # %%
 #   calculate total rainfall May to Sep(mm/day) pentad 25-54
-erapre_59sum = era.loc[25:54, :, :, :]
-
-
+erapre_59sum = era.loc[25:54, :, :, :].sum(dim = "year") / 30.0 / 36.0
 
 # %%
 #   calculate annual range(mm/day)
