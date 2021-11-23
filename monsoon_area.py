@@ -2,7 +2,7 @@
 Author: ChenHJ
 Date: 2021-11-22 16:33:19
 LastEditors: ChenHJ
-LastEditTime: 2021-11-23 21:25:36
+LastEditTime: 2021-11-23 21:28:38
 FilePath: /ys17-23/chenhj/1019code/monsoon_area.py
 Aim: 
 Mission: 
@@ -203,4 +203,8 @@ erapre_59sum = era.loc[25:54, :, :, :].sum(dim = "year") / 30.0 / 36.0
 erapre_ac = era.mean(dim = "year", skipna = True)
 erapre_ar = erapre_ac.max(dim = "pentad", skipna = True) - erapre_ac.min(dim = "pentad", skipna = True)
 
+# %%
+#   calculate rainfall ratio of (May to Sep)/year (%)
+erapre_y = erapre_ac.sum(dim = "pentad", skipna = True)
+erapre_ratio = erapre_59sum / erapre_y
 # %%
