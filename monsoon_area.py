@@ -108,7 +108,7 @@ pre_ar = pre_ac.max(dim = "month", skipna = True) - pre_ac.min(dim = "month", sk
 # %%
 #   计算Rainfall ratio of (May to Sep)/year )(%)
 pre_y = pre_ac.sum(dim = "month", skipna = True)
-pre_ratio = pre_59sum / pre_y
+pre_ratio = p_time(pre, 5, 9, False).sum(dim = "time") / 42.0 / pre_y
 
 # %%
 #   计算RR index = R_i - R_J
