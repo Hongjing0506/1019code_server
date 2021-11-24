@@ -96,7 +96,8 @@ pre = fpre["precip"]
 
 # %%
 #   计算Total Rainfall May to Sep(mm/day)
-pre_59sum = p_time(pre, 5, 9, False).sum(dim = "time") / 42.0 / 5.0
+pre_59sum = p_month(pre, 5, 9).mean(dim = "time").mean(dim = "month") 
+print(pre_59sum)
 
 
 # %%
