@@ -2,7 +2,7 @@
 Author: ChenHJ
 Date: 2021-11-25 00:38:16
 LastEditors: ChenHJ
-LastEditTime: 2021-11-25 12:15:45
+LastEditTime: 2021-11-25 12:33:05
 FilePath: /chenhj/1019code/IOSM&ISM.py
 Aim: 
 Mission: 
@@ -93,10 +93,9 @@ fpre = xr.open_dataset(
     ch + "/home/ys17-23/chenhj/monsoon/pyear/GPCC_r144x72_1979-2020.nc"
 )
 pre = fpre["precip"]
-print(pre)
 # %%
 #   Indian Ocean monsoon area
 IOpre = pre.loc[:, 65:75, 5:20]
-print(IOpre)
+
 
 # %%
