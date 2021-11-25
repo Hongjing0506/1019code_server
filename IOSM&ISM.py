@@ -2,7 +2,7 @@
 Author: ChenHJ
 Date: 2021-11-25 00:38:16
 LastEditors: ChenHJ
-LastEditTime: 2021-11-25 12:37:54
+LastEditTime: 2021-11-25 12:40:08
 FilePath: /chenhj/1019code/IOSM&ISM.py
 Aim: 
 Mission: 
@@ -95,7 +95,7 @@ fpre = xr.open_dataset(
 pre = fpre["precip"]
 # %%
 #   Indian Ocean monsoon area
-IOpre = pre.loc[:, 65:75, 5:20]
+IOpre = pre.loc[:, 5:20, 65:75]
 
 
 #   calculate annual cycle
