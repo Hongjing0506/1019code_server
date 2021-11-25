@@ -2,7 +2,7 @@
 Author: ChenHJ
 Date: 2021-11-25 00:38:16
 LastEditors: ChenHJ
-LastEditTime: 2021-11-25 12:33:05
+LastEditTime: 2021-11-25 12:37:54
 FilePath: /chenhj/1019code/IOSM&ISM.py
 Aim: 
 Mission: 
@@ -98,4 +98,13 @@ pre = fpre["precip"]
 IOpre = pre.loc[:, 65:75, 5:20]
 
 
+#   calculate annual cycle
+IOac = p_month(IOpre, 1, 12).mean(dim = ["time", "lat", "lon"], skipna = True)
+
+
+# %%
+#   plot the annual cycle
+fig = pplt.figure()
+axs = fig.subplots(ncols = 2, nrows = 2, wspace = 4.0, hspace = 4.0)
+axs[0].plot(IOac)
 # %%
