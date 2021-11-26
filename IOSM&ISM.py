@@ -125,11 +125,11 @@ pre_RR = pre_max - pre_Jan
 
 # %%
 #   Indian Ocean monsoon area
-IOpre = pre.loc[:, 5:20, 65:75]
-
+ma = pre.where(pre_RR > 5.00)
+IO = ma.loc[:, ]
 
 #   calculate annual cycle
-IOac = p_month(IOpre, 1, 12).mean(dim=["time", "lat", "lon"], skipna=True)
+# IOac = p_month(IOpre, 1, 12).mean(dim=["time", "lat", "lon"], skipna=True)
 
 
 # %%
