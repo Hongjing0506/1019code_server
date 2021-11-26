@@ -116,6 +116,14 @@ pre = fpre["precip"]
 lmask = ch + "/home/ys17-23/chenhj/monsoon/pyear/lsmask.nc"
 
 # %%
+#   calculate monsoon area
+pre_ac = p_month(pre, 1, 12).mean(dim="time")
+pre_Jan = pre.groupby("time.month")[1].mean(dim="time", skipna=True)
+pre_max = pre_ac.max(dim="month", skipna=True)
+pre_RR = pre_max - pre_Jan
+
+
+# %%
 #   Indian Ocean monsoon area
 IOpre = pre.loc[:, 5:20, 65:75]
 
