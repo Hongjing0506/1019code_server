@@ -1,12 +1,12 @@
-'''
+"""
 Author: ChenHJ
 Date: 2021-11-25 00:38:16
 LastEditors: ChenHJ
-LastEditTime: 2021-11-25 12:40:08
-FilePath: /chenhj/1019code/IOSM&ISM.py
+LastEditTime: 2021-11-25 17:29:42
+FilePath: /ys17-23/chenhj/1019code/IOSM&ISM.py
 Aim: 
 Mission: 
-'''
+"""
 # %%
 import numpy as np
 import xarray as xr
@@ -45,7 +45,9 @@ return {*}
 
 def p_time(data, mon_s, mon_end, meanon):
     time = data["time"]
-    n_data = data.sel(time=(data.time.dt.month<=mon_end)*(data.time.dt.month>=mon_s))
+    n_data = data.sel(
+        time=(data.time.dt.month <= mon_end) * (data.time.dt.month >= mon_s)
+    )
     n_mon = mon_end - mon_s + 1
     if meanon == True:
         n_data_mean = n_data.coarsen(time=n_mon).mean()
@@ -54,37 +56,54 @@ def p_time(data, mon_s, mon_end, meanon):
         return n_data
     else:
         print("Bad argument: meanon")
-        
-        
-'''
+
+
+"""
 description: 
     本函数用于将需要的月份挑选出来，并存储为月份x年份xlatxlon的形式
 param {*} data
 param {*} mon_s
 param {*} mon_e
 return {*}
-'''        
+"""
+
+
 def p_month(data, mon_s, mon_e):
     import pandas as pd
     import xarray as xr
+
     time = data["time"]
-    data.transpose("time",...)
+    data.transpose("time", ...)
     year_s = pd.to_datetime(time).year[1]
     year_e = pd.to_datetime(time).year[-1]
-    nyear = pd.date_range(str(year_s), str(year_e), freq = "AS")
+    nyear = pd.date_range(str(year_s), str(year_e), freq="AS")
     m_ind = data.groupby("time.month").groups[mon_s]
     res = data[m_ind]
-    res['time'] = nyear
+    res["time"] = nyear
     for i in np.arange(mon_s + 1, mon_e + 1):
         m_ind = data.groupby("time.month").groups[i]
         tmp = data[m_ind]
-        tmp['time'] = nyear
+        tmp["time"] = nyear
         res = xr.concat([res, tmp], "month")
-        
+
     month = np.arange(mon_s, mon_e + 1)
     res["month"] = month
-    return(res)
-    
+    return res
+
+
+def lsmask(ds, lsdir, label):
+    with xr.open_dataset(lsdir) as f:
+        da = f["mask"][0]
+    landsea = filplonlat(da)
+    ds.coords["mask"] = (("lat", "lon"), landsea.values)
+    if label == "land":
+        ds = ds.where(ds.mask < 1)
+    elif label == "ocean":
+        ds = ds.where(ds.mask > 0)
+    del ds["mask"]
+    return ds
+
+
 # %%
 # 读取数据
 
@@ -93,18 +112,33 @@ fpre = xr.open_dataset(
     ch + "/home/ys17-23/chenhj/monsoon/pyear/GPCC_r144x72_1979-2020.nc"
 )
 pre = fpre["precip"]
+
+lmask = ch + "/home/ys17-23/chenhj/monsoon/pyear/lsmask.nc"
+
 # %%
 #   Indian Ocean monsoon area
 IOpre = pre.loc[:, 5:20, 65:75]
 
 
 #   calculate annual cycle
-IOac = p_month(IOpre, 1, 12).mean(dim = ["time", "lat", "lon"], skipna = True)
+IOac = p_month(IOpre, 1, 12).mean(dim=["time", "lat", "lon"], skipna=True)
 
 
 # %%
 #   plot the annual cycle
-fig = pplt.figure()
-axs = fig.subplots(ncols = 2, nrows = 2, wspace = 4.0, hspace = 4.0)
-axs[0].plot(IOac)
+fig = pplt.figure(span=False, share=False)
+axs = fig.subplots(ncols=2, nrows=2, wspace=4.0, hspace=4.0)
+axs[0].plot(IOac, zorder=0)
+axs[0].scatter(IOac, marker="x", zorder=2)
+axs[0].format(
+    ylim=(0, 10),
+    ylocator=1,
+    title="IOSM annual cycle",
+    urtitle="5°N-20°N\n65°E-75°E",
+    ylabel="mm/day",
+    xlim=(1, 12),
+    xlocator=1,
+    grid=False,
+    tickminor=False,
+)
 # %%
