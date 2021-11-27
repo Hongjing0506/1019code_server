@@ -101,12 +101,13 @@ def filplonlat(ds):
     ds["lon"] = ((ds["lon"] + 180) % 360) - 180
     # Sort lons, so that subset operations end up being simpler.
     ds = ds.sortby("lon")
-    """ 
+    """
     ds = ds.sortby("lat", ascending=True)
     # print(ds.attrs)
     print('\n\nAfter sorting lat values, ds["lat"] is:')
     print(ds["lat"])
     return ds
+
 
 def lsmask(ds, lsdir, label):
     with xr.open_dataset(lsdir) as f:
@@ -143,19 +144,34 @@ pre_RR = pre_max - pre_Jan
 # %%
 #   Indian Ocean monsoon area
 ma = pre.where(pre_RR > 5.00)
-IOSM = lsmask(ma, lmask, "ocean").loc[:, 0:30, 60:80]
-ISM = lsmask(ma, lmask, "land").loc[:, 0:30, 65:85]
+IOSM_pre = lsmask(ma, lmask, "ocean").loc[:, 0:30, 60:80]
+# IOSM_pre = lsmask(ma, lmask, "ocean").loc[:, 0:25, 65:75]
+ISM_pre = lsmask(ma, lmask, "land").loc[:, 0:30, 70:90]
 
+
+# %%
 #   calculate annual cycle
-# IOac = p_month(IOpre, 1, 12).mean(dim=["time", "lat", "lon"], skipna=True)
+IOSMac = p_month(IOSM_pre, 1, 12).mean(dim=["time", "lat", "lon"], skipna=True)
+IOac = p_month(ma.loc[:, 0:25, 65:75], 1, 12).mean(
+    dim=["time", "lat", "lon"], skipna=True
+)
 
 
 # %%
 #   plot the annual cycle
+pplt.rc.grid = False
+pplt.rc.reso = "lo"
+
+proj = pplt.PlateCarree()
+
 fig = pplt.figure(span=False, share=False)
-axs = fig.subplots(ncols=2, nrows=2, wspace=4.0, hspace=4.0)
-axs[0].plot(IOac, zorder=0)
-axs[0].scatter(IOac, marker="x", zorder=2)
+axs = fig.subplots(
+    ncols=2, nrows=2, proj=[None, proj, None, None], wspace=4.0, hspace=4.0
+)
+axs[0].plot(IOSMac, zorder=0)
+axs[0].scatter(IOSMac, marker="x", zorder=2)
+# axs[0].plot(IOac, color="b", zorder=0)
+# axs[0].scatter(IOac, marker="o", zorder=2, color="b")
 axs[0].format(
     ylim=(0, 10),
     ylocator=1,
@@ -167,4 +183,44 @@ axs[0].format(
     grid=False,
     tickminor=False,
 )
+
+xticks = np.array([40, 60, 80, 100, 120, 140, 160, 180])
+yticks = np.array([0, 10, 20, 30, 40, 50])
+axs.format(coast=True, coastlinewidth=0.8, lonlim=(40, 180), latlim=(0, 50))
+axs.set_xticks(xticks)
+axs.set_yticks(yticks)
+lon_formatter = LongitudeFormatter(zero_direction_label=True)
+lat_formatter = LatitudeFormatter()
+axs.minorticks_on()
+xminorLocator = MultipleLocator(5)
+yminorLocator = MultipleLocator(10)
+for ax in axs:
+    ax.xaxis.set_major_formatter(lon_formatter)
+    ax.yaxis.set_major_formatter(lat_formatter)
+    ax.xaxis.set_minor_locator(xminorLocator)
+    ax.yaxis.set_minor_locator(yminorLocator)
+    ax.outline_patch.set_linewidth(1.0)
+axs.tick_params(
+    axis="both",
+    which="major",
+    labelsize=8,
+    direction="out",
+    length=4.0,
+    width=0.8,
+    pad=2.0,
+    top=False,
+    right=False,
+)
+axs.tick_params(
+    axis="both",
+    which="minor",
+    direction="out",
+    length=3.0,
+    width=0.8,
+    top=False,
+    right=False,
+)
+
+
 # %%
+
