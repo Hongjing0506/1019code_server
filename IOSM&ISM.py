@@ -91,6 +91,23 @@ def p_month(data, mon_s, mon_e):
     return res
 
 
+def filplonlat(ds):
+    # To facilitate data subsetting
+    # print(da.attrs)
+    """
+    print(
+        f'\n\nBefore flip, lon range is [{ds["lon"].min().data}, {ds["lon"].max().data}].'
+    )
+    ds["lon"] = ((ds["lon"] + 180) % 360) - 180
+    # Sort lons, so that subset operations end up being simpler.
+    ds = ds.sortby("lon")
+    """ 
+    ds = ds.sortby("lat", ascending=True)
+    # print(ds.attrs)
+    print('\n\nAfter sorting lat values, ds["lat"] is:')
+    print(ds["lat"])
+    return ds
+
 def lsmask(ds, lsdir, label):
     with xr.open_dataset(lsdir) as f:
         da = f["mask"][0]
@@ -126,7 +143,8 @@ pre_RR = pre_max - pre_Jan
 # %%
 #   Indian Ocean monsoon area
 ma = pre.where(pre_RR > 5.00)
-IO = ma.loc[:, ]
+IOSM = lsmask(ma, lmask, "ocean").loc[:, 0:30, 60:80]
+ISM = lsmask(ma, lmask, "land").loc[:, 0:30, 65:85]
 
 #   calculate annual cycle
 # IOac = p_month(IOpre, 1, 12).mean(dim=["time", "lat", "lon"], skipna=True)
