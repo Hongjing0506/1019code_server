@@ -133,6 +133,11 @@ pre = fpre["precip"]
 
 lmask = ch + "/home/ys17-23/chenhj/monsoon/pyear/lsmask.nc"
 
+fu = xr.open_dataset(ch + "/home/ys17-23/chenhj/monsoon/pyear/ERA5u_r144x72_1979-2020.nc")
+u = fu['u']
+
+fv = xr.open_dataset(ch + "/home/ys17-23/chenhj/monsoon/pyear/ERA5v_r144x72_1979-2020.nc")
+v = fv['v']
 # %%
 #   calculate monsoon area
 pre_ac = p_month(pre, 1, 12).mean(dim="time")
@@ -238,4 +243,5 @@ for ax in axs:
 axs[0].contour(pre_RR, c = "black", vmin = 5, vmax = 5, lw = 1.0)
 axs[0].pcolormesh(IOSM_pre.mean(dim = ["time"], skipna = True), extend = "both", color = "red")
 axs[0].pcolormesh(ISM_pre.mean(dim = ["time"], skipna = True), extend = "both", color = "blue")
-axs[0].format(title = "ISM area", titleloc = 'l')
+axs[0].format(title = "monsoon area", titleloc = 'l')
+# %%
