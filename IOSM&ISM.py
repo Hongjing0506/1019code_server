@@ -222,7 +222,7 @@ axs[1].tick_params(
 )
 
 axs[1].contour(pre_RR, c = "black", vmin = 5, vmax = 5, lw = 1.0)
-axs[1].contourf(IOSM_pre.mean(dim = ["time"], skipna = True), colorbar = "b", colorbar_kw = {"ticklen": 0, "ticklabelsize": 5, "width": 0.11, "label": ""}, extend = "both")
+axs[1].pcolormesh(IOSM_pre.mean(dim = ["time"], skipna = True), extend = "both", color = "red")
 axs[1].format(title = "IOSM area", titleloc = 'l')
 # %%
 
