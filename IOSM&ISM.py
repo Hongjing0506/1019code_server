@@ -146,7 +146,7 @@ pre_RR = pre_max - pre_Jan
 ma = pre.where(pre_RR > 5.00)
 IOSM_pre = lsmask(ma, lmask, "ocean").loc[:, 0:30, 60:80]
 # IOSM_pre = lsmask(ma, lmask, "ocean").loc[:, 0:25, 65:75]
-ISM_pre = lsmask(ma, lmask, "land").loc[:, 0:30, 70:85]
+ISM_pre = lsmask(ma, lmask, "land").loc[:, 0:30, 70:87]
 
 
 # %%
@@ -165,19 +165,17 @@ pplt.rc.reso = "lo"
 
 proj = pplt.PlateCarree()
 
-fig = pplt.figure(span=False, share=False)
+fig = pplt.figure()
 axs = fig.subplots(
-    ncols=2, nrows=2, proj=[None, proj, None, None], wspace=4.0, hspace=4.0
+    ncols=1, nrows=1, wspace=4.0, hspace=4.0
 )
-axs[0].plot(IOSMac, zorder=0, color = "red")
-axs[0].scatter(IOSMac, marker="x", zorder=2, color = "red")
-axs[0].plot(ISMac, zorder=0, color = "blue")
-axs[0].scatter(ISMac, marker="o", zorder=2, color="blue")
+
+axs[0].plot(IOSMac, color = "red", legend = 'ur', marker = "o", legend_kw = {'ncols' : 1, 'labels' : 'IOSM'})
+axs[0].plot(ISMac, color = "blue", legend = 'ur', marker = "o", legend_kw = {'ncols' : 1, 'labels' : 'ISM'})
+
 axs[0].format(
     ylim=(0, 13),
     ylocator=1,
-    title="IOSM annual cycle",
-    urtitle="5°N-20°N\n65°E-75°E",
     ylabel="mm/day",
     xlim=(1, 12),
     xlocator=1,
@@ -185,47 +183,59 @@ axs[0].format(
     tickminor=False,
     titleloc = "l"
 )
+fig.format(suptitle = "Annual Cycle")
+
+# %%
+
+pplt.rc.grid = False
+pplt.rc.reso = "lo"
+
+proj = pplt.PlateCarree()
+
+fig = pplt.figure(span=False, share=False)
+axs = fig.subplots(
+    ncols=2, nrows=2, proj=proj, wspace=4.0, hspace=4.0
+)
 
 xticks = np.array([40, 60, 80, 100, 120, 140, 160, 180])
 yticks = np.array([0, 10, 20, 30, 40, 50])
-axs[1].format(coast=True, coastlinewidth=0.8, lonlim=(40, 180), latlim=(0, 50))
-axs[1].set_xticks(xticks)
-axs[1].set_yticks(yticks)
+axs.format(coast=True, coastlinewidth=0.8, lonlim=(40, 180), latlim=(0, 50))
+axs.set_xticks(xticks)
+axs.set_yticks(yticks)
 lon_formatter = LongitudeFormatter(zero_direction_label=True)
 lat_formatter = LatitudeFormatter()
-axs[1].minorticks_on()
+axs.minorticks_on()
 xminorLocator = MultipleLocator(5)
 yminorLocator = MultipleLocator(10)
 
-axs[1].xaxis.set_major_formatter(lon_formatter)
-axs[1].yaxis.set_major_formatter(lat_formatter)
-axs[1].xaxis.set_minor_locator(xminorLocator)
-axs[1].yaxis.set_minor_locator(yminorLocator)
-axs[1].outline_patch.set_linewidth(1.0)
-axs[1].tick_params(
-    axis="both",
-    which="major",
-    labelsize=8,
-    direction="out",
-    length=4.0,
-    width=0.8,
-    pad=2.0,
-    top=False,
-    right=False,
-)
-axs[1].tick_params(
-    axis="both",
-    which="minor",
-    direction="out",
-    length=3.0,
-    width=0.8,
-    top=False,
-    right=False,
-)
+for ax in axs:
+    ax.xaxis.set_major_formatter(lon_formatter)
+    ax.yaxis.set_major_formatter(lat_formatter)
+    ax.xaxis.set_minor_locator(xminorLocator)
+    ax.yaxis.set_minor_locator(yminorLocator)
+    ax.outline_patch.set_linewidth(1.0)
+    ax.tick_params(
+        axis="both",
+        which="major",
+        labelsize=8,
+        direction="out",
+        length=4.0,
+        width=0.8,
+        pad=2.0,
+        top=False,
+        right=False,
+    )
+    ax.tick_params(
+        axis="both",
+        which="minor",
+        direction="out",
+        length=3.0,
+        width=0.8,
+        top=False,
+        right=False,
+    )
 
-axs[1].contour(pre_RR, c = "black", vmin = 5, vmax = 5, lw = 1.0)
-axs[1].pcolormesh(IOSM_pre.mean(dim = ["time"], skipna = True), extend = "both", color = "red")
-axs[1].pcolormesh(ISM_pre.mean(dim = ["time"], skipna = True), extend = "both", color = "blue")
-axs[1].format(title = "ISM area", titleloc = 'l')
-# %%
-
+axs[0].contour(pre_RR, c = "black", vmin = 5, vmax = 5, lw = 1.0)
+axs[0].pcolormesh(IOSM_pre.mean(dim = ["time"], skipna = True), extend = "both", color = "red")
+axs[0].pcolormesh(ISM_pre.mean(dim = ["time"], skipna = True), extend = "both", color = "blue")
+axs[0].format(title = "ISM area", titleloc = 'l')
