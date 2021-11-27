@@ -186,21 +186,21 @@ axs[0].format(
 
 xticks = np.array([40, 60, 80, 100, 120, 140, 160, 180])
 yticks = np.array([0, 10, 20, 30, 40, 50])
-axs.format(coast=True, coastlinewidth=0.8, lonlim=(40, 180), latlim=(0, 50))
-axs.set_xticks(xticks)
-axs.set_yticks(yticks)
+axs[1].format(coast=True, coastlinewidth=0.8, lonlim=(40, 180), latlim=(0, 50))
+axs[1].set_xticks(xticks)
+axs[1].set_yticks(yticks)
 lon_formatter = LongitudeFormatter(zero_direction_label=True)
 lat_formatter = LatitudeFormatter()
-axs.minorticks_on()
+axs[1].minorticks_on()
 xminorLocator = MultipleLocator(5)
 yminorLocator = MultipleLocator(10)
-for ax in axs:
-    ax.xaxis.set_major_formatter(lon_formatter)
-    ax.yaxis.set_major_formatter(lat_formatter)
-    ax.xaxis.set_minor_locator(xminorLocator)
-    ax.yaxis.set_minor_locator(yminorLocator)
-    ax.outline_patch.set_linewidth(1.0)
-axs.tick_params(
+
+axs[1].xaxis.set_major_formatter(lon_formatter)
+axs[1].yaxis.set_major_formatter(lat_formatter)
+axs[1].xaxis.set_minor_locator(xminorLocator)
+axs[1].yaxis.set_minor_locator(yminorLocator)
+axs[1].outline_patch.set_linewidth(1.0)
+axs[1].tick_params(
     axis="both",
     which="major",
     labelsize=8,
@@ -211,7 +211,7 @@ axs.tick_params(
     top=False,
     right=False,
 )
-axs.tick_params(
+axs[1].tick_params(
     axis="both",
     which="minor",
     direction="out",
@@ -221,6 +221,8 @@ axs.tick_params(
     right=False,
 )
 
-
+axs[1].contour(pre_RR, c = "black", vmin = 5, vmax = 5, lw = 1.0)
+axs[1].contourf(IOSM_pre.mean(dim = ["time"], skipna = True), colorbar = "b", colorbar_kw = {"ticklen": 0, "ticklabelsize": 5, "width": 0.11, "label": ""}, extend = "both")
+axs[1].format(title = "IOSM area", titleloc = 'l')
 # %%
 
