@@ -146,15 +146,16 @@ pre_RR = pre_max - pre_Jan
 ma = pre.where(pre_RR > 5.00)
 IOSM_pre = lsmask(ma, lmask, "ocean").loc[:, 0:30, 60:80]
 # IOSM_pre = lsmask(ma, lmask, "ocean").loc[:, 0:25, 65:75]
-ISM_pre = lsmask(ma, lmask, "land").loc[:, 0:30, 70:90]
+ISM_pre = lsmask(ma, lmask, "land").loc[:, 0:30, 70:85]
 
 
 # %%
 #   calculate annual cycle
 IOSMac = p_month(IOSM_pre, 1, 12).mean(dim=["time", "lat", "lon"], skipna=True)
-IOac = p_month(ma.loc[:, 0:25, 65:75], 1, 12).mean(
-    dim=["time", "lat", "lon"], skipna=True
-)
+# IOac = p_month(ma.loc[:, 0:25, 65:75], 1, 12).mean(
+#     dim=["time", "lat", "lon"], skipna=True
+# )
+ISMac = p_month(ISM_pre, 1, 12).mean(dim = ["time", "lat", "lon"], skipna = True)
 
 
 # %%
@@ -168,12 +169,12 @@ fig = pplt.figure(span=False, share=False)
 axs = fig.subplots(
     ncols=2, nrows=2, proj=[None, proj, None, None], wspace=4.0, hspace=4.0
 )
-axs[0].plot(IOSMac, zorder=0)
-axs[0].scatter(IOSMac, marker="x", zorder=2)
-# axs[0].plot(IOac, color="b", zorder=0)
-# axs[0].scatter(IOac, marker="o", zorder=2, color="b")
+axs[0].plot(IOSMac, zorder=0, color = "red")
+axs[0].scatter(IOSMac, marker="x", zorder=2, color = "red")
+axs[0].plot(ISMac, zorder=0, color = "blue")
+axs[0].scatter(ISMac, marker="o", zorder=2, color="blue")
 axs[0].format(
-    ylim=(0, 10),
+    ylim=(0, 13),
     ylocator=1,
     title="IOSM annual cycle",
     urtitle="5°N-20°N\n65°E-75°E",
@@ -182,6 +183,7 @@ axs[0].format(
     xlocator=1,
     grid=False,
     tickminor=False,
+    titleloc = "l"
 )
 
 xticks = np.array([40, 60, 80, 100, 120, 140, 160, 180])
@@ -223,6 +225,7 @@ axs[1].tick_params(
 
 axs[1].contour(pre_RR, c = "black", vmin = 5, vmax = 5, lw = 1.0)
 axs[1].pcolormesh(IOSM_pre.mean(dim = ["time"], skipna = True), extend = "both", color = "red")
-axs[1].format(title = "IOSM area", titleloc = 'l')
+axs[1].pcolormesh(ISM_pre.mean(dim = ["time"], skipna = True), extend = "both", color = "blue")
+axs[1].format(title = "ISM area", titleloc = 'l')
 # %%
 
