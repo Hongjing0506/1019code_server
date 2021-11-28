@@ -207,7 +207,9 @@ IOSMac = p_month(IOSM_pre, 1, 12).mean(dim=["time", "lat", "lon"], skipna=True)
 ISMac = p_month(ISM_pre, 1, 12).mean(dim=["time", "lat", "lon"], skipna=True)
 
 IOSM_uac = p_month(IOSM_u, 1, 12).mean(dim=["time", "lat", "lon"], skipna=True)
+IOSM_uac = IOSM_uac - IOSM_uac.mean(skipna=True)
 ISM_uac = p_month(ISM_u, 1, 12).mean(dim=["time", "lat", "lon"], skipna=True)
+ISM_uac = ISM_uac - ISM_uac.mean(skipna=True)
 
 # %%
 #   different month for hgt & uv
@@ -224,9 +226,10 @@ pplt.rc.grid = False
 pplt.rc.reso = "lo"
 
 proj = pplt.PlateCarree()
-
-fig = pplt.figure(span=False, share=False)
-axs = fig.subplots(ncols=2, nrows=1, wspace=4.0, hspace=4.0, proj=[proj, None])
+widths = 2
+heights = [2,3]
+fig = pplt.figure(span=False, share=False,refwidth=4.0)
+axs = fig.subplots(ncols=1, nrows=2, wspace=4.0, hspace=4.0, proj=[proj, None], wratios = widths, hratios = heights)
 
 xticks = np.array([40, 60, 80, 100, 120, 140, 160, 180])
 yticks = np.array([0, 10, 20, 30, 40, 50])
@@ -272,29 +275,34 @@ axs[0].pcolormesh(ISM_pre.mean(dim=["time"], skipna=True), extend="both", color=
 axs[0].format(title="monsoon area", titleloc="l")
 
 
-axs[1].plot(IOSMac, color="red", marker="o", zorder=1, markersize=3.0)
-axs[1].plot(ISMac, color="blue", marker="o", zorder=2, markersize=3.0)
+m1 = axs[1].plot(IOSMac, color="red", marker="o", zorder=1, markersize=3.0)
+m2 = axs[1].plot(ISMac, color="blue", marker="o", zorder=2, markersize=3.0)
 axs[1].axhline(5, color="black", linewidth=0.8, zorder=0)
-
+ox = axs[1].alty(color="black", label='m/s', linewidth = 1)
+m3 = ox.line(IOSM_uac, color="red", marker="o", zorder=1, markersize=3.0, linestyle='--')
+m4 = ox.line(ISM_uac, color="blue", marker="o", zorder=2, markersize=3.0, linestyle='--')
+ox.format(ylim=(-15, 15), ylocator=3,tickminor=False)
 axs[1].format(
-    ylim=(0, 13),
+    ylim=(0, 10),
     ylocator=2,
     ylabel="mm/day",
     xlim=(1, 12),
     xlocator=1,
     grid=False,
-    tickminor=False,
+    ytickminor=True,
+    xtickminor = False,
     titleloc="l",
     title="annual cycle",
 )
-axs[1].legend(
-    labels=["IOSM", "ISM"],
-    lw=1.0,
+axs[1].legend(handles=[m1, m2, m3, m4],
+    labels=["IOSM_pre", "ISM_pre", "IOSM_u", "ISM_u"],
+    lw=0.6,
     loc="ur",
     ncols=1,
-    markersize=3.0,
-    fontsize=0.8,
+    markersize=2.5,
+    fontsize=0.5,
     frame=False,
+    center = None
 )
 
 # %%
