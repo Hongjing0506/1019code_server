@@ -170,25 +170,74 @@ pplt.rc.reso = "lo"
 
 proj = pplt.PlateCarree()
 
-fig = pplt.figure()
+fig = pplt.figure(span = False, share = False)
 axs = fig.subplots(
-    ncols=1, nrows=1, wspace=4.0, hspace=4.0
+    ncols=2, nrows=1, wspace=4.0, hspace=4.0, proj = [proj, None]
 )
 
-axs[0].plot(IOSMac, color = "red", legend = 'ur', marker = "o", legend_kw = {'ncols' : 1, 'labels' : 'IOSM'})
-axs[0].plot(ISMac, color = "blue", legend = 'ur', marker = "o", legend_kw = {'ncols' : 1, 'labels' : 'ISM'})
+xticks = np.array([40, 60, 80, 100, 120, 140, 160, 180])
+yticks = np.array([0, 10, 20, 30, 40, 50])
+axs.format(coast=True, coastlinewidth=0.8, lonlim=(40, 180), latlim=(0, 50))
+axs.set_xticks(xticks)
+axs.set_yticks(yticks)
+lon_formatter = LongitudeFormatter(zero_direction_label=True)
+lat_formatter = LatitudeFormatter()
+axs.minorticks_on()
+xminorLocator = MultipleLocator(5)
+yminorLocator = MultipleLocator(10)
 
-axs[0].format(
+
+axs[0].xaxis.set_major_formatter(lon_formatter)
+axs[0].yaxis.set_major_formatter(lat_formatter)
+axs[0].xaxis.set_minor_locator(xminorLocator)
+axs[0].yaxis.set_minor_locator(yminorLocator)
+axs[0].outline_patch.set_linewidth(1.0)
+axs[0].tick_params(
+    axis="both",
+    which="major",
+    labelsize=8,
+    direction="out",
+    length=4.0,
+    width=0.8,
+    pad=2.0,
+    top=False,
+    right=False,
+)
+axs[0].tick_params(
+    axis="both",
+    which="minor",
+    direction="out",
+    length=3.0,
+    width=0.8,
+    top=False,
+    right=False,
+)
+
+axs[0].contour(pre_RR, c = "black", vmin = 5, vmax = 5, lw = 1.0)
+axs[0].pcolormesh(IOSM_pre.mean(dim = ["time"], skipna = True), extend = "both", color = "red")
+axs[0].pcolormesh(ISM_pre.mean(dim = ["time"], skipna = True), extend = "both", color = "blue")
+axs[0].format(title = "monsoon area", titleloc = 'l')
+
+
+
+axs[1].plot(IOSMac, color = "red", marker = "o")
+axs[1].plot(ISMac, color = "blue", marker = "o")
+axs[1].axhline(5, color = "black", linewidth = 1.0)
+
+axs[1].format(
     ylim=(0, 13),
-    ylocator=1,
+    ylocator=2,
+    yminorlocator=1,
+    ytickminor = True,
     ylabel="mm/day",
     xlim=(1, 12),
     xlocator=1,
     grid=False,
     tickminor=False,
-    titleloc = "l"
+    titleloc = "l",
+    title = "annual cycle"
 )
-fig.format(suptitle = "Annual Cycle")
+axs[1].legend(labels = ["IOSM", "ISM"], lw = 1.0, loc = 'ur', ncols = 1, markersize = 3.0, fontsize = 0.8, frame = False)
 
 # %%
 
