@@ -131,7 +131,7 @@ fpre = xr.open_dataset(
 )
 pre = fpre["precip"]
 
-lmask = ch + "/home/ys17-23/chenhj/monsoon/pyear/lsmask.nc"
+lmask = ch + "/home/ys17-23/chenhj/monsoon/pyear/lsmask72x144.nc"
 
 fu = xr.open_dataset(ch + "/home/ys17-23/chenhj/monsoon/pyear/ERA5u_r144x72_1979-2020.nc")
 u = fu['u']
