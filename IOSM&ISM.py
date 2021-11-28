@@ -220,15 +220,13 @@ axs[0].format(title = "monsoon area", titleloc = 'l')
 
 
 
-axs[1].plot(IOSMac, color = "red", marker = "o")
-axs[1].plot(ISMac, color = "blue", marker = "o")
-axs[1].axhline(5, color = "black", linewidth = 1.0)
+axs[1].plot(IOSMac, color = "red", marker = "o", zorder = 1)
+axs[1].plot(ISMac, color = "blue", marker = "o", zorder = 2)
+axs[1].axhline(5, color = "black", linewidth = 0.8, zorder = 0)
 
 axs[1].format(
     ylim=(0, 13),
     ylocator=2,
-    yminorlocator=1,
-    ytickminor = True,
     ylabel="mm/day",
     xlim=(1, 12),
     xlocator=1,
