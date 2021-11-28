@@ -24,6 +24,7 @@ import cartopy.feature as cfeature
 from cartopy.mpl.ticker import LongitudeFormatter
 from cartopy.mpl.ticker import LatitudeFormatter
 from matplotlib.ticker import MultipleLocator
+from matplotlib.patches import Rectangle
 import matplotlib.pyplot as plt
 
 """
@@ -121,7 +122,32 @@ def lsmask(ds, lsdir, label):
     del ds["mask"]
     return ds
 
-
+def mapart(ax, extents):
+    proj = ccrs.PlateCarree()
+    ax.coastlines(color='k', lw=1.5)
+    ax.add_feature(cfeature.LAND, edgecolor='black', facecolor='white')
+    ax.set_extent(extents, crs=proj)
+    xticks = np.arange(extents[0], extents[1]+1, 20)
+    yticks = np.arange(extents[2], extents[3]+1, 10)
+    #这里的间隔需要根据自己实际调整
+    ax.set_xticks(xticks, crs=proj)
+    ax.set_yticks(yticks, crs=proj)
+    lon_formatter = LongitudeFormatter(zero_direction_label=True)
+    lat_formatter = LatitudeFormatter()
+    ax.xaxis.set_major_formatter(lon_formatter)
+    xminorLocator = MultipleLocator(5)
+    yminorLocator = MultipleLocator(10)
+    ax.yaxis.set_major_formatter(lat_formatter)
+    ax.xaxis.set_major_formatter(lon_formatter)
+    ax.yaxis.set_minor_locator(xminorLocator)
+    ax.xaxis.set_minor_locator(yminorLocator)
+    ax.tick_params(axis='both', which='major', labelsize=8, direction='out',
+                    length=4.0, width=0.8, pad=2.0, top=False, right=False)
+    #为了便于在不同的场景中使用，这里使用了一个全局变量gl_font
+    ax.minorticks_on()
+    ax.tick_params(axis='both', which='minor', direction='out', length=3.0,
+                    width=0.8, top=False, right=False)
+    ax.outline_patch.set_linewidth(1.0)
 # %%
 # 读取数据
 
@@ -167,6 +193,9 @@ IOSM_pre = lsmask(ma, lmask, "ocean").loc[:, 0:30, 60:80]
 # IOSM_pre = lsmask(ma, lmask, "ocean").loc[:, 0:25, 65:75]
 ISM_pre = lsmask(ma, lmask, "land").loc[:, 0:30, 70:87]
 
+uma = u850.where(pre_RR > 5.00)
+IOSM_u = lsmask(uma, lmask, "ocean").loc[:, 0:30, 60:80]
+ISM_u = lsmask(uma, lmask, "land").loc[:, 0:30, 70:87]
 
 
 # %%
@@ -177,11 +206,12 @@ IOSMac = p_month(IOSM_pre, 1, 12).mean(dim=["time", "lat", "lon"], skipna=True)
 # )
 ISMac = p_month(ISM_pre, 1, 12).mean(dim=["time", "lat", "lon"], skipna=True)
 
+IOSM_uac = p_month(u850, 1, 12).mean()
 
 # %%
 #   different month for hgt & uv
 hgt850_month = p_month(hgt850, 5, 9).mean(dim = "time", skipna = True)
-hgt850_month = hgt850_month - hgt850.mean(dim = "time")
+# hgt850_month = hgt850_month - hgt850.mean(dim = "time")
 u850_month = p_month(u850, 5, 9).mean(dim = "time", skipna = True)
 u850_month = u850_month - u850.mean(dim = "time")
 v850_month = p_month(v850, 5, 9).mean(dim = "time", skipna = True)
@@ -279,7 +309,7 @@ axs = fig.subplots(array, proj=proj, wspace=4.0, hspace=4.0)
 
 xticks = np.array([40, 60, 80, 100, 120])
 yticks = np.array([0, 10, 20, 30, 40])
-axs.format(coast=True, coastlinewidth=0.8, lonlim=(40, 120), latlim=(0, 40))
+axs.format(coast=True, coastlinewidth=0.8, lonlim=(40, 120), latlim=(0, 40), coastzorder = 1)
 axs.set_xticks(xticks)
 axs.set_yticks(yticks)
 lon_formatter = LongitudeFormatter(zero_direction_label=True)
@@ -315,13 +345,68 @@ for ax in axs:
         right=False,
     )
 
+w, h = 0.12, 0.14
 for i,ax in enumerate(axs):
-    m = ax.contourf(hgt850_month[i, :, :], cmap = "ColdHot", extend = "both")
-    ax.quiver(u850_month[i, :, :], v850_month[i, :, :])
-fig.colorbar(m, loc = 'b')
-# axs[0].contourf(pre_RR, c="black", vmin=5, vmax=5, lw=1.0)
-# axs[0].pcolormesh(IOSM_pre.mean(dim=["time"], skipna=True), extend="both", color="red")
-# axs[0].pcolormesh(ISM_pre.mean(dim=["time"], skipna=True), extend="both", color="blue")
-# axs[0].format(title="monsoon area", titleloc="l")
+    rect = Rectangle(
+        (1 - w, 0), w, h, transform=ax.transAxes,
+        fc='white', ec='k', lw=0.5, zorder=1.1
+    )
+    con = ax.contourf(hgt850_month[i, :, :], cmap = "ColdHot", extend = "both", vmin = 1400, vmax = 1560, levels = np.arange(1400, 1570, 20))
+    m = ax.quiver(u850_month[i, :, :], v850_month[i, :, :], zorder = 1, headwidth = 4, scale_units = 'xy', scale = 3, pivot = 'mid', minlength = 1.0)
+    ax.add_patch(rect)
+    qk = ax.quiverkey(
+        m, X=1-w/2, Y=0.7*h, U=8,
+        label='8 m/s', labelpos='S', labelsep=0.02,
+        fontproperties={'size': 5}, zorder = 3.1
+    )
+fig.colorbar(con, loc = 'b', label = 'm')
+
+
+# %%
+# # plot hgt & UV with pyplot
+# proj = ccrs.ccrs.PlateCarree()
+# fig = plt.figure()
+# axs = fig.add_subplot(111 , projection=proj)
+# extents = [40,120,0,35]
+# for ax in axs:
+#     mapart1(ax, extents)
+#     #填色图
+#     im = ax.contourf(
+#         lon, lat, da, transform=proj, extend='neither',cmap=cmaps.ViBlGrWhYeOrRe, 
+#         alpha=0.8, levels=np.arange(-1., 1.09, 0.1), zorder=0
+#     )
+#     ax.set_title('left_title', fontdict=font, loc='left')
+#     ax.set_title('right_title', fontdict=font, loc='right')
+#     cbposition = fig.add_axes([0.45, 0.12, 0.015, 0.55])
+#     # 设置色标位置。第一个调整左右位置，值越大越往右；第二个调整上下位置，值越大越高；第三个调整长度，左边位置不变，值越大越长
+#     cb1 = fig.colorbar(im, cax=cbposition, orientation='vertical',
+#                     spacing='proportional', format='%.1f', extend='both')
+#     cbart(cb1)
+#     # 添加显著性检验
+#     area = np.where(s[ ::n, ::].data < 0.05)
+#     plt_sig(s, ax, n, area)
+#     #矢量图
+#     Q = ax.quiver(
+#         u.lon[::6].data, u.lat[::6].data,
+#         u[ ::6, ::6].data, v[ ::6, ::6].data, transform=proj, zorder=2,
+#         units='xy', angles='uv', scale=0.1, scale_units='xy',
+#         width=0.8
+#     )
+#     #添加指示箭头
+#     w, h = 0.12, 0.12
+#     rect = Rectangle(
+#         (1 - w, 0), w, h, transform=ax2.transAxes,
+#         fc='white', ec='k', lw=0.5, zorder=1.1
+#     )
+#     ax2.add_patch(rect)
+#     # 添加quiverkey.
+#     # U指定风箭头对应的速度.
+#     qk = ax.quiverkey(
+#         Q, X=1-w/2, Y=0.7*h, U=1,
+#         label=f'{1}', labelpos='S', labelsep=0.02,
+#         fontproperties={'size': 4}
+#     )
+    
 # %%
 
+# %%
