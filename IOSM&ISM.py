@@ -133,11 +133,25 @@ pre = fpre["precip"]
 
 lmask = ch + "/home/ys17-23/chenhj/monsoon/pyear/lsmask72x144.nc"
 
-fu = xr.open_dataset(ch + "/home/ys17-23/chenhj/monsoon/pyear/ERA5u_r144x72_1979-2020.nc")
-u = fu['u']
+fu = xr.open_dataset(
+    ch + "/home/ys17-23/chenhj/monsoon/pyear/ERA5u_r144x72_1979-2020.nc"
+)
+u = fu["u"]
+u850 = u.loc[:, 850, :, :]
 
-fv = xr.open_dataset(ch + "/home/ys17-23/chenhj/monsoon/pyear/ERA5v_r144x72_1979-2020.nc")
-v = fv['v']
+fv = xr.open_dataset(
+    ch + "/home/ys17-23/chenhj/monsoon/pyear/ERA5v_r144x72_1979-2020.nc"
+)
+v = fv["v"]
+v850 = v.loc[:, 850, :, :]
+
+fhgt = xr.open_dataset(
+    ch + "/home/ys17-23/chenhj/monsoon/pyear/ERA5hgt_r144x72_1979-2020.nc"
+)
+hgt = fhgt["z"]
+hgt = hgt / 9.80665
+hgt850 = hgt.loc[:, 850, :, :]
+
 # %%
 #   calculate monsoon area
 pre_ac = p_month(pre, 1, 12).mean(dim="time")
@@ -154,14 +168,24 @@ IOSM_pre = lsmask(ma, lmask, "ocean").loc[:, 0:30, 60:80]
 ISM_pre = lsmask(ma, lmask, "land").loc[:, 0:30, 70:87]
 
 
+
 # %%
 #   calculate annual cycle
 IOSMac = p_month(IOSM_pre, 1, 12).mean(dim=["time", "lat", "lon"], skipna=True)
 # IOac = p_month(ma.loc[:, 0:25, 65:75], 1, 12).mean(
 #     dim=["time", "lat", "lon"], skipna=True
 # )
-ISMac = p_month(ISM_pre, 1, 12).mean(dim = ["time", "lat", "lon"], skipna = True)
+ISMac = p_month(ISM_pre, 1, 12).mean(dim=["time", "lat", "lon"], skipna=True)
 
+
+# %%
+#   different month for hgt & uv
+hgt850_month = p_month(hgt850, 5, 9).mean(dim = "time", skipna = True)
+hgt850_month = hgt850_month - hgt850.mean(dim = "time")
+u850_month = p_month(u850, 5, 9).mean(dim = "time", skipna = True)
+u850_month = u850_month - u850.mean(dim = "time")
+v850_month = p_month(v850, 5, 9).mean(dim = "time", skipna = True)
+v850_month = v850_month - v850.mean(dim = "time")
 
 # %%
 #   plot the annual cycle
@@ -170,10 +194,8 @@ pplt.rc.reso = "lo"
 
 proj = pplt.PlateCarree()
 
-fig = pplt.figure(span = False, share = False)
-axs = fig.subplots(
-    ncols=2, nrows=1, wspace=4.0, hspace=4.0, proj = [proj, None]
-)
+fig = pplt.figure(span=False, share=False)
+axs = fig.subplots(ncols=2, nrows=1, wspace=4.0, hspace=4.0, proj=[proj, None])
 
 xticks = np.array([40, 60, 80, 100, 120, 140, 160, 180])
 yticks = np.array([0, 10, 20, 30, 40, 50])
@@ -213,16 +235,15 @@ axs[0].tick_params(
     right=False,
 )
 
-axs[0].contour(pre_RR, c = "black", vmin = 5, vmax = 5, lw = 1.0)
-axs[0].pcolormesh(IOSM_pre.mean(dim = ["time"], skipna = True), extend = "both", color = "red")
-axs[0].pcolormesh(ISM_pre.mean(dim = ["time"], skipna = True), extend = "both", color = "blue")
-axs[0].format(title = "monsoon area", titleloc = 'l')
+axs[0].contour(pre_RR, c="black", vmin=5, vmax=5, lw=1.0)
+axs[0].pcolormesh(IOSM_pre.mean(dim=["time"], skipna=True), extend="both", color="red")
+axs[0].pcolormesh(ISM_pre.mean(dim=["time"], skipna=True), extend="both", color="blue")
+axs[0].format(title="monsoon area", titleloc="l")
 
 
-
-axs[1].plot(IOSMac, color = "red", marker = "o", zorder = 1)
-axs[1].plot(ISMac, color = "blue", marker = "o", zorder = 2)
-axs[1].axhline(5, color = "black", linewidth = 0.8, zorder = 0)
+axs[1].plot(IOSMac, color="red", marker="o", zorder=1, markersize=3.0)
+axs[1].plot(ISMac, color="blue", marker="o", zorder=2, markersize=3.0)
+axs[1].axhline(5, color="black", linewidth=0.8, zorder=0)
 
 axs[1].format(
     ylim=(0, 13),
@@ -232,26 +253,33 @@ axs[1].format(
     xlocator=1,
     grid=False,
     tickminor=False,
-    titleloc = "l",
-    title = "annual cycle"
+    titleloc="l",
+    title="annual cycle",
 )
-axs[1].legend(labels = ["IOSM", "ISM"], lw = 1.0, loc = 'ur', ncols = 1, markersize = 3.0, fontsize = 0.8, frame = False)
+axs[1].legend(
+    labels=["IOSM", "ISM"],
+    lw=1.0,
+    loc="ur",
+    ncols=1,
+    markersize=3.0,
+    fontsize=0.8,
+    frame=False,
+)
 
 # %%
-
+# plot the hgt & u, v
 pplt.rc.grid = False
 pplt.rc.reso = "lo"
 
 proj = pplt.PlateCarree()
 
+array = [[1,1,2,2],[3,3,4,4],[0,5,5,0]]
 fig = pplt.figure(span=False, share=False)
-axs = fig.subplots(
-    ncols=2, nrows=2, proj=proj, wspace=4.0, hspace=4.0
-)
+axs = fig.subplots(array, proj=proj, wspace=4.0, hspace=4.0)
 
-xticks = np.array([40, 60, 80, 100, 120, 140, 160, 180])
-yticks = np.array([0, 10, 20, 30, 40, 50])
-axs.format(coast=True, coastlinewidth=0.8, lonlim=(40, 180), latlim=(0, 50))
+xticks = np.array([40, 60, 80, 100, 120])
+yticks = np.array([0, 10, 20, 30, 40])
+axs.format(coast=True, coastlinewidth=0.8, lonlim=(40, 120), latlim=(0, 40))
 axs.set_xticks(xticks)
 axs.set_yticks(yticks)
 lon_formatter = LongitudeFormatter(zero_direction_label=True)
@@ -287,8 +315,13 @@ for ax in axs:
         right=False,
     )
 
-axs[0].contour(pre_RR, c = "black", vmin = 5, vmax = 5, lw = 1.0)
-axs[0].pcolormesh(IOSM_pre.mean(dim = ["time"], skipna = True), extend = "both", color = "red")
-axs[0].pcolormesh(ISM_pre.mean(dim = ["time"], skipna = True), extend = "both", color = "blue")
-axs[0].format(title = "monsoon area", titleloc = 'l')
+for i,ax in enumerate(axs):
+    m = ax.contourf(hgt850_month[i, :, :], cmap = "ColdHot", extend = "both")
+    ax.quiver(u850_month[i, :, :], v850_month[i, :, :])
+fig.colorbar(m, loc = 'b')
+# axs[0].contourf(pre_RR, c="black", vmin=5, vmax=5, lw=1.0)
+# axs[0].pcolormesh(IOSM_pre.mean(dim=["time"], skipna=True), extend="both", color="red")
+# axs[0].pcolormesh(ISM_pre.mean(dim=["time"], skipna=True), extend="both", color="blue")
+# axs[0].format(title="monsoon area", titleloc="l")
 # %%
+
