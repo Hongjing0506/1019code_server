@@ -206,7 +206,8 @@ IOSMac = p_month(IOSM_pre, 1, 12).mean(dim=["time", "lat", "lon"], skipna=True)
 # )
 ISMac = p_month(ISM_pre, 1, 12).mean(dim=["time", "lat", "lon"], skipna=True)
 
-IOSM_uac = p_month(u850, 1, 12).mean()
+IOSM_uac = p_month(IOSM_u, 1, 12).mean(dim=["time", "lat", "lon"], skipna=True)
+ISM_uac = p_month(ISM_u, 1, 12).mean(dim=["time", "lat", "lon"], skipna=True)
 
 # %%
 #   different month for hgt & uv
