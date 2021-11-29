@@ -164,12 +164,14 @@ fu = xr.open_dataset(
 )
 u = fu["u"]
 u850 = u.loc[:, 850, :, :]
+u200 = u.loc[:, 200, :, :]
 
 fv = xr.open_dataset(
     ch + "/home/ys17-23/chenhj/monsoon/pyear/ERA5v_r144x72_1979-2020.nc"
 )
 v = fv["v"]
 v850 = v.loc[:, 850, :, :]
+v200 = v.loc[:, 200, :, :]
 
 fhgt = xr.open_dataset(
     ch + "/home/ys17-23/chenhj/monsoon/pyear/ERA5hgt_r144x72_1979-2020.nc"
@@ -177,6 +179,7 @@ fhgt = xr.open_dataset(
 hgt = fhgt["z"]
 hgt = hgt / 9.80665
 hgt850 = hgt.loc[:, 850, :, :]
+hgt200 = hgt.loc[:, 200, :, :]
 
 # %%
 #   calculate monsoon area
@@ -216,10 +219,13 @@ ISM_uac = ISM_uac - ISM_uac.mean(skipna=True)
 hgt850_month = p_month(hgt850, 5, 9).mean(dim = "time", skipna = True)
 # hgt850_month = hgt850_month - hgt850.mean(dim = "time")
 u850_month = p_month(u850, 5, 9).mean(dim = "time", skipna = True)
-u850_month = u850_month - u850.mean(dim = "time")
+# u850_month = u850_month - u850.mean(dim = "time")
 v850_month = p_month(v850, 5, 9).mean(dim = "time", skipna = True)
-v850_month = v850_month - v850.mean(dim = "time")
+# v850_month = v850_month - v850.mean(dim = "time")
 
+hgt200_month = p_month(hgt200, 5, 9).mean(dim = "time", skipna = True)
+u200_month = p_month(u200, 5, 9).mean(dim = "time", skipna = True)
+v200_month = p_month(v200, 5, 9).mean(dim = "time", skipna = True)
 # %%
 #   plot the annual cycle
 pplt.rc.grid = False
@@ -295,7 +301,7 @@ axs[1].format(
     title="annual cycle",
 )
 axs[1].legend(handles=[m1, m2, m3, m4],
-    labels=["IOSM_pre", "ISM_pre", "IOSM_u", "ISM_u"],
+    labels=["IOSM_pre", "ISM_pre", "IOSM_u850", "ISM_u850"],
     lw=0.6,
     loc="ur",
     ncols=1,
@@ -304,6 +310,7 @@ axs[1].legend(handles=[m1, m2, m3, m4],
     frame=False,
     center = None
 )
+fig.format(abcloc = 'l', abc = 'a)')
 
 # %%
 # plot the hgt & u, v
@@ -368,53 +375,15 @@ for i,ax in enumerate(axs):
         label='8 m/s', labelpos='S', labelsep=0.02,
         fontproperties={'size': 5}, zorder = 3.1
     )
+    title = ['MAY', 'JUN', 'JUL', 'AUG', 'SEP']
+    ax.format(ltitle = title[i])
 fig.colorbar(con, loc = 'b', label = 'm')
+fig.format(suptitle = 'hgt & wind in 850hPa', abcloc = 'l', abc = 'a)')
 
 
 # %%
-# # plot hgt & UV with pyplot
-# proj = ccrs.ccrs.PlateCarree()
-# fig = plt.figure()
-# axs = fig.add_subplot(111 , projection=proj)
-# extents = [40,120,0,35]
-# for ax in axs:
-#     mapart1(ax, extents)
-#     #填色图
-#     im = ax.contourf(
-#         lon, lat, da, transform=proj, extend='neither',cmap=cmaps.ViBlGrWhYeOrRe, 
-#         alpha=0.8, levels=np.arange(-1., 1.09, 0.1), zorder=0
-#     )
-#     ax.set_title('left_title', fontdict=font, loc='left')
-#     ax.set_title('right_title', fontdict=font, loc='right')
-#     cbposition = fig.add_axes([0.45, 0.12, 0.015, 0.55])
-#     # 设置色标位置。第一个调整左右位置，值越大越往右；第二个调整上下位置，值越大越高；第三个调整长度，左边位置不变，值越大越长
-#     cb1 = fig.colorbar(im, cax=cbposition, orientation='vertical',
-#                     spacing='proportional', format='%.1f', extend='both')
-#     cbart(cb1)
-#     # 添加显著性检验
-#     area = np.where(s[ ::n, ::].data < 0.05)
-#     plt_sig(s, ax, n, area)
-#     #矢量图
-#     Q = ax.quiver(
-#         u.lon[::6].data, u.lat[::6].data,
-#         u[ ::6, ::6].data, v[ ::6, ::6].data, transform=proj, zorder=2,
-#         units='xy', angles='uv', scale=0.1, scale_units='xy',
-#         width=0.8
-#     )
-#     #添加指示箭头
-#     w, h = 0.12, 0.12
-#     rect = Rectangle(
-#         (1 - w, 0), w, h, transform=ax2.transAxes,
-#         fc='white', ec='k', lw=0.5, zorder=1.1
-#     )
-#     ax2.add_patch(rect)
-#     # 添加quiverkey.
-#     # U指定风箭头对应的速度.
-#     qk = ax.quiverkey(
-#         Q, X=1-w/2, Y=0.7*h, U=1,
-#         label=f'{1}', labelpos='S', labelsep=0.02,
-#         fontproperties={'size': 4}
-#     )
+#  calculate linear trend
+
     
 # %%
 
