@@ -563,4 +563,10 @@ axs[0].plot(ISMiv, color = "blue", zorder = 2)
 axs[0].format(ylim = (4, 10), ylabel = "mm/day", grid = False, ytickminor = False, xtickminor = True, titleloc = "l", title = "interannual variability")
 
 # %%
+#   calculate interannual linear trend map
+preiv = p_month(pre, 5, 9).mean(dim = "month", skipna = True)
+preivtrend = preiv.polyfit(dim="time", deg = 1, skipna = True, full = True)
+print(preivtrend)
 
+
+# %%
