@@ -122,14 +122,15 @@ def lsmask(ds, lsdir, label):
     del ds["mask"]
     return ds
 
+
 def mapart(ax, extents):
     proj = ccrs.PlateCarree()
-    ax.coastlines(color='k', lw=1.5)
-    ax.add_feature(cfeature.LAND, edgecolor='black', facecolor='white')
+    ax.coastlines(color="k", lw=1.5)
+    ax.add_feature(cfeature.LAND, edgecolor="black", facecolor="white")
     ax.set_extent(extents, crs=proj)
-    xticks = np.arange(extents[0], extents[1]+1, 20)
-    yticks = np.arange(extents[2], extents[3]+1, 10)
-    #这里的间隔需要根据自己实际调整
+    xticks = np.arange(extents[0], extents[1] + 1, 20)
+    yticks = np.arange(extents[2], extents[3] + 1, 10)
+    # 这里的间隔需要根据自己实际调整
     ax.set_xticks(xticks, crs=proj)
     ax.set_yticks(yticks, crs=proj)
     lon_formatter = LongitudeFormatter(zero_direction_label=True)
@@ -141,13 +142,41 @@ def mapart(ax, extents):
     ax.xaxis.set_major_formatter(lon_formatter)
     ax.yaxis.set_minor_locator(xminorLocator)
     ax.xaxis.set_minor_locator(yminorLocator)
-    ax.tick_params(axis='both', which='major', labelsize=8, direction='out',
-                    length=4.0, width=0.8, pad=2.0, top=False, right=False)
-    #为了便于在不同的场景中使用，这里使用了一个全局变量gl_font
+    ax.tick_params(
+        axis="both",
+        which="major",
+        labelsize=8,
+        direction="out",
+        length=4.0,
+        width=0.8,
+        pad=2.0,
+        top=False,
+        right=False,
+    )
+    # 为了便于在不同的场景中使用，这里使用了一个全局变量gl_font
     ax.minorticks_on()
-    ax.tick_params(axis='both', which='minor', direction='out', length=3.0,
-                    width=0.8, top=False, right=False)
+    ax.tick_params(
+        axis="both",
+        which="minor",
+        direction="out",
+        length=3.0,
+        width=0.8,
+        top=False,
+        right=False,
+    )
     ax.outline_patch.set_linewidth(1.0)
+
+
+def detrend_dim(da, dim, deg, trend):
+    # detrend along a single dimension
+    p = da.polyfit(dim=dim, deg=deg, skipna=True)
+    fit = xr.polyval(da[dim], p.polyfit_coefficients)
+    if trend == False:
+        return da - fit
+    elif trend == True:
+        return fit
+
+
 # %%
 # 读取数据
 
@@ -216,16 +245,16 @@ ISM_uac = ISM_uac - ISM_uac.mean(skipna=True)
 
 # %%
 #   different month for hgt & uv
-hgt850_month = p_month(hgt850, 5, 9).mean(dim = "time", skipna = True)
+hgt850_month = p_month(hgt850, 5, 9).mean(dim="time", skipna=True)
 # hgt850_month = hgt850_month - hgt850.mean(dim = "time")
-u850_month = p_month(u850, 5, 9).mean(dim = "time", skipna = True)
+u850_month = p_month(u850, 5, 9).mean(dim="time", skipna=True)
 # u850_month = u850_month - u850.mean(dim = "time")
-v850_month = p_month(v850, 5, 9).mean(dim = "time", skipna = True)
+v850_month = p_month(v850, 5, 9).mean(dim="time", skipna=True)
 # v850_month = v850_month - v850.mean(dim = "time")
 
-hgt200_month = p_month(hgt200, 5, 9).mean(dim = "time", skipna = True)
-u200_month = p_month(u200, 5, 9).mean(dim = "time", skipna = True)
-v200_month = p_month(v200, 5, 9).mean(dim = "time", skipna = True)
+hgt200_month = p_month(hgt200, 5, 9).mean(dim="time", skipna=True)
+u200_month = p_month(u200, 5, 9).mean(dim="time", skipna=True)
+v200_month = p_month(v200, 5, 9).mean(dim="time", skipna=True)
 # %%
 #   plot the annual cycle
 pplt.rc.grid = False
@@ -233,9 +262,17 @@ pplt.rc.reso = "lo"
 
 proj = pplt.PlateCarree()
 widths = 2
-heights = [2,3]
-fig = pplt.figure(span=False, share=False,refwidth=4.0)
-axs = fig.subplots(ncols=1, nrows=2, wspace=4.0, hspace=4.0, proj=[proj, None], wratios = widths, hratios = heights)
+heights = [2, 3]
+fig = pplt.figure(span=False, share=False, refwidth=4.0)
+axs = fig.subplots(
+    ncols=1,
+    nrows=2,
+    wspace=4.0,
+    hspace=4.0,
+    proj=[proj, None],
+    wratios=widths,
+    hratios=heights,
+)
 
 xticks = np.array([40, 60, 80, 100, 120, 140, 160, 180])
 yticks = np.array([0, 10, 20, 30, 40, 50])
@@ -284,10 +321,14 @@ axs[0].format(title="monsoon area", titleloc="l")
 m1 = axs[1].plot(IOSMac, color="red", marker="o", zorder=1, markersize=3.0)
 m2 = axs[1].plot(ISMac, color="blue", marker="o", zorder=2, markersize=3.0)
 axs[1].axhline(5, color="black", linewidth=0.8, zorder=0)
-ox = axs[1].alty(color="black", label='m/s', linewidth = 1)
-m3 = ox.line(IOSM_uac, color="red", marker="o", zorder=1, markersize=3.0, linestyle='--')
-m4 = ox.line(ISM_uac, color="blue", marker="o", zorder=2, markersize=3.0, linestyle='--')
-ox.format(ylim=(-15, 15), ylocator=3,tickminor=False)
+ox = axs[1].alty(color="black", label="m/s", linewidth=1)
+m3 = ox.line(
+    IOSM_uac, color="red", marker="o", zorder=1, markersize=3.0, linestyle="--"
+)
+m4 = ox.line(
+    ISM_uac, color="blue", marker="o", zorder=2, markersize=3.0, linestyle="--"
+)
+ox.format(ylim=(-15, 15), ylocator=3, tickminor=False)
 axs[1].format(
     ylim=(0, 10),
     ylocator=2,
@@ -296,11 +337,12 @@ axs[1].format(
     xlocator=1,
     grid=False,
     ytickminor=True,
-    xtickminor = False,
+    xtickminor=False,
     titleloc="l",
     title="annual cycle",
 )
-axs[1].legend(handles=[m1, m2, m3, m4],
+axs[1].legend(
+    handles=[m1, m2, m3, m4],
     labels=["IOSM_pre", "ISM_pre", "IOSM_u850", "ISM_u850"],
     lw=0.6,
     loc="ur",
@@ -308,9 +350,9 @@ axs[1].legend(handles=[m1, m2, m3, m4],
     markersize=2.5,
     fontsize=0.5,
     frame=False,
-    center = None
+    center=None,
 )
-fig.format(abcloc = 'l', abc = 'a)')
+fig.format(abcloc="l", abc="a)")
 
 # %%
 # plot the hgt & u, v
@@ -319,13 +361,15 @@ pplt.rc.reso = "lo"
 
 proj = pplt.PlateCarree()
 
-array = [[1,1,2,2],[3,3,4,4],[0,5,5,0]]
+array = [[1, 1, 2, 2], [3, 3, 4, 4], [0, 5, 5, 0]]
 fig = pplt.figure(span=False, share=False)
 axs = fig.subplots(array, proj=proj, wspace=4.0, hspace=4.0)
 
 xticks = np.array([40, 60, 80, 100, 120])
 yticks = np.array([0, 10, 20, 30, 40])
-axs.format(coast=True, coastlinewidth=0.8, lonlim=(40, 120), latlim=(0, 40), coastzorder = 1)
+axs.format(
+    coast=True, coastlinewidth=0.8, lonlim=(40, 120), latlim=(0, 40), coastzorder=1
+)
 axs.set_xticks(xticks)
 axs.set_yticks(yticks)
 lon_formatter = LongitudeFormatter(zero_direction_label=True)
@@ -362,29 +406,146 @@ for ax in axs:
     )
 
 w, h = 0.12, 0.14
-for i,ax in enumerate(axs):
+for i, ax in enumerate(axs):
     rect = Rectangle(
-        (1 - w, 0), w, h, transform=ax.transAxes,
-        fc='white', ec='k', lw=0.5, zorder=1.1
+        (1 - w, 0), w, h, transform=ax.transAxes, fc="white", ec="k", lw=0.5, zorder=1.1
     )
-    con = ax.contourf(hgt850_month[i, :, :], cmap = "ColdHot", extend = "both", vmin = 1400, vmax = 1560, levels = np.arange(1400, 1570, 20))
-    m = ax.quiver(u850_month[i, :, :], v850_month[i, :, :], zorder = 1, headwidth = 4, scale_units = 'xy', scale = 3, pivot = 'mid', minlength = 1.0)
+    con = ax.contourf(
+        hgt850_month[i, :, :],
+        cmap="ColdHot",
+        extend="both",
+        vmin=1400,
+        vmax=1560,
+        levels=np.arange(1400, 1570, 20),
+    )
+    m = ax.quiver(
+        u850_month[i, :, :],
+        v850_month[i, :, :],
+        zorder=1,
+        headwidth=4,
+        scale_units="xy",
+        scale=3,
+        pivot="mid",
+        minlength=1.0,
+    )
     ax.add_patch(rect)
     qk = ax.quiverkey(
-        m, X=1-w/2, Y=0.7*h, U=8,
-        label='8 m/s', labelpos='S', labelsep=0.02,
-        fontproperties={'size': 5}, zorder = 3.1
+        m,
+        X=1 - w / 2,
+        Y=0.7 * h,
+        U=8,
+        label="8 m/s",
+        labelpos="S",
+        labelsep=0.02,
+        fontproperties={"size": 5},
+        zorder=3.1,
     )
-    title = ['MAY', 'JUN', 'JUL', 'AUG', 'SEP']
-    ax.format(ltitle = title[i])
-fig.colorbar(con, loc = 'b', label = 'm')
-fig.format(suptitle = 'hgt & wind in 850hPa', abcloc = 'l', abc = 'a)')
+    title = ["MAY", "JUN", "JUL", "AUG", "SEP"]
+    ax.format(ltitle=title[i])
+fig.colorbar(con, loc="b", label="m")
+fig.format(suptitle="hgt & wind in 850hPa", abcloc="l", abc="a)")
 
 
 # %%
-#  calculate linear trend
+#   plot the 200hPa hgt & u,v wind
+pplt.rc.grid = False
+pplt.rc.reso = "lo"
 
-    
+proj = pplt.PlateCarree()
+
+array = [[1, 1, 2, 2], [3, 3, 4, 4], [0, 5, 5, 0]]
+fig = pplt.figure(span=False, share=False)
+axs = fig.subplots(array, proj=proj, wspace=4.0, hspace=4.0)
+
+xticks = np.array([40, 60, 80, 100, 120])
+yticks = np.array([0, 10, 20, 30, 40])
+axs.format(
+    coast=True, coastlinewidth=0.8, lonlim=(40, 120), latlim=(0, 40), coastzorder=1
+)
+axs.set_xticks(xticks)
+axs.set_yticks(yticks)
+lon_formatter = LongitudeFormatter(zero_direction_label=True)
+lat_formatter = LatitudeFormatter()
+axs.minorticks_on()
+xminorLocator = MultipleLocator(5)
+yminorLocator = MultipleLocator(10)
+
+for ax in axs:
+    ax.xaxis.set_major_formatter(lon_formatter)
+    ax.yaxis.set_major_formatter(lat_formatter)
+    ax.xaxis.set_minor_locator(xminorLocator)
+    ax.yaxis.set_minor_locator(yminorLocator)
+    ax.outline_patch.set_linewidth(1.0)
+    ax.tick_params(
+        axis="both",
+        which="major",
+        labelsize=8,
+        direction="out",
+        length=4.0,
+        width=0.8,
+        pad=2.0,
+        top=False,
+        right=False,
+    )
+    ax.tick_params(
+        axis="both",
+        which="minor",
+        direction="out",
+        length=3.0,
+        width=0.8,
+        top=False,
+        right=False,
+    )
+
+w, h = 0.12, 0.14
+for i, ax in enumerate(axs):
+    rect = Rectangle(
+        (1 - w, 0), w, h, transform=ax.transAxes, fc="white", ec="k", lw=0.5, zorder=1.1
+    )
+    con = ax.contourf(
+        hgt200_month[i, :, :],
+        cmap="ColdHot",
+        extend="both",
+        vmin=12100,
+        vmax=12600,
+        levels=np.arange(12100, 12600, 20),
+    )
+    ax.contour(
+        hgt200_month[i, :, :], color="black", levels=np.arange(12500, 12541, 20), lw=0.7
+    )
+    m = ax.quiver(
+        u200_month[i, :, :],
+        v200_month[i, :, :],
+        zorder=1,
+        headwidth=4,
+        scale_units="xy",
+        scale=4,
+        pivot="mid",
+        minlength=1.0,
+    )
+    ax.add_patch(rect)
+    qk = ax.quiverkey(
+        m,
+        X=1 - w / 2,
+        Y=0.7 * h,
+        U=8,
+        label="8 m/s",
+        labelpos="S",
+        labelsep=0.02,
+        fontproperties={"size": 5},
+        zorder=3.1,
+    )
+    title = ["MAY", "JUN", "JUL", "AUG", "SEP"]
+    ax.format(ltitle=title[i])
+fig.colorbar(con, loc="b", label="m")
+fig.format(suptitle="hgt & wind in 200hPa", abcloc="l", abc="a)")
+
+
+# %%
+#  calculate interannual variation and linear trend
+IOSMiv = p_month(IOSMpre, 6, 7).mean(dim=["month", "lat", "lon"], skipna=True)
+ISMiv = p_month(ISMpre, 6, 9).mean(dim=["month", "lat", "lon"], skipna=True)
 # %%
 
 # %%
+
