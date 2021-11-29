@@ -169,7 +169,7 @@ def mapart(ax, extents):
 
 def detrend_dim(da, dim, deg, trend):
     # detrend along a single dimension
-    p = da.polyfit(dim=dim, deg=deg, skipna=True)
+    p = da.polyfit(dim=dim, deg=1, skipna=True)
     fit = xr.polyval(da[dim], p.polyfit_coefficients)
     if trend == False:
         return da - fit
@@ -543,9 +543,24 @@ fig.format(suptitle="hgt & wind in 200hPa", abcloc="l", abc="a)")
 
 # %%
 #  calculate interannual variation and linear trend
-IOSMiv = p_month(IOSMpre, 6, 7).mean(dim=["month", "lat", "lon"], skipna=True)
-ISMiv = p_month(ISMpre, 6, 9).mean(dim=["month", "lat", "lon"], skipna=True)
+IOSMiv = p_month(IOSM_pre, 6, 7).mean(dim=["month", "lat", "lon"], skipna=True)
+print(IOSMiv)
+ISMiv = p_month(ISM_pre, 6, 9).mean(dim=["month", "lat", "lon"], skipna=True)
+
+IOSMivtrend = IOSMiv.polyfit(dim = "time", deg = 1, skipna = True, full = True)
+print(IOSMivtrend.polyfit_coefficients)
+print(IOSMivtrend.polyfit_residuals)
+
+ISMivtrend = ISMiv.polyfit(dim = "time", deg = 1, skipna = True, full = True)
+print(ISMivtrend.polyfit_coefficients)
+print(ISMivtrend.polyfit_residuals)
 # %%
+#   plot the interannual variation and linear trend
+fig3 = pplt.figure(span=False, share = False, refwidth=4.0)
+axs = fig3.subplots(ncols = 1, nrows = 1)
+axs[0].plot(IOSMiv, color = "red", zorder = 1)
+axs[0].plot(ISMiv, color = "blue", zorder = 2)
+axs[0].format(ylim = (4, 10), ylabel = "mm/day", grid = False, ytickminor = False, xtickminor = True, titleloc = "l", title = "interannual variability")
 
 # %%
 
