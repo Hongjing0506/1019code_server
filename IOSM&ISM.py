@@ -570,3 +570,58 @@ print(preivtrend)
 
 
 # %%
+#   plot linear trend map
+pplt.rc.grid = False
+pplt.rc.reso = "lo"
+
+proj = pplt.PlateCarree()
+
+# array = [[1, 1, 2, 2], [3, 3, 4, 4], [0, 5, 5, 0]]
+fig4 = pplt.figure(span=False, share=False)
+axs = fig4.subplots(ncols = 1, nrows = 1, proj=proj, wspace=4.0, hspace=4.0)
+
+xticks = np.array([40, 60, 80, 100, 120])
+yticks = np.array([0, 10, 20, 30, 40])
+axs.format(
+    coast=True, coastlinewidth=0.8, lonlim=(40, 120), latlim=(0, 40), coastzorder=1
+)
+axs.set_xticks(xticks)
+axs.set_yticks(yticks)
+lon_formatter = LongitudeFormatter(zero_direction_label=True)
+lat_formatter = LatitudeFormatter()
+axs.minorticks_on()
+xminorLocator = MultipleLocator(5)
+yminorLocator = MultipleLocator(10)
+
+for ax in axs:
+    ax.xaxis.set_major_formatter(lon_formatter)
+    ax.yaxis.set_major_formatter(lat_formatter)
+    ax.xaxis.set_minor_locator(xminorLocator)
+    ax.yaxis.set_minor_locator(yminorLocator)
+    ax.outline_patch.set_linewidth(1.0)
+    ax.tick_params(
+        axis="both",
+        which="major",
+        labelsize=8,
+        direction="out",
+        length=4.0,
+        width=0.8,
+        pad=2.0,
+        top=False,
+        right=False,
+    )
+    ax.tick_params(
+        axis="both",
+        which="minor",
+        direction="out",
+        length=3.0,
+        width=0.8,
+        top=False,
+        right=False,
+    )
+
+w, h = 0.12, 0.14
+m = axs[0].contourf(preivtrend["polyfit_coefficients"].loc[1, :, :], cmap = "ColdHot", colorbar = "b", colorbar_kw = {"ticklen": 0, "ticklabelsize": 5, "width": 0.11, "label": ""})
+
+fig.format(suptitle="linear trend", abcloc="l", abc="a)")
+# %%
