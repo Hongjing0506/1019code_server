@@ -191,12 +191,14 @@ def dim_linregress(x, y):
         dask="parallelized",
     )
 
+
 def plt_sig(da, ax, n, area):
     da_cyc, lon_cyc = add_cyclic_point(da[::n, ::n], coord=da.lon[::n])
     nx, ny = np.meshgrid(lon_cyc, da.lat[::n])
     sig = ax.scatter(
-        nx[area], ny[area], marker='.', s=9, c='black', alpha=0.6, transform=proj
+        nx[area], ny[area], marker=".", s=9, c="black", alpha=0.6, transform=proj
     )
+
 
 # %%
 # 读取数据
@@ -231,8 +233,12 @@ hgt = hgt / 9.80665
 hgt850 = hgt.loc[:, 850, :, :]
 hgt200 = hgt.loc[:, 200, :, :]
 
-fhadisst = xr.open_dataset(ch + "/home/ys17-23/chenhj/monsoon/pyear/HadISST_r144x72_1979-2020.nc")
+fhadisst = xr.open_dataset(
+    ch + "/home/ys17-23/chenhj/monsoon/pyear/HadISST_r144x72_1979-2020.nc"
+)
 hadisst = fhadisst["sst"]
+
+
 # %%
 #   calculate monsoon area
 pre_ac = p_month(pre, 1, 12).mean(dim="time")
@@ -616,7 +622,7 @@ axs[0].format(
 
 # %%
 #   calculate interannual linear trend map
-# r_lim in 95% is 0.3042 
+# r_lim in 95% is 0.3042
 preiv = p_month(pre, 5, 9).mean(dim="month", skipna=True)
 year = np.arange(1979, 2021, 1)
 preiv.coords["time"] = year
@@ -684,19 +690,78 @@ m = axs[0].contourf(
     preivrv,
     cmap="ColdHot",
     colorbar="b",
-    levels = np.arange(-1.0, 1.1, 0.1),
+    levels=np.arange(-1.0, 1.1, 0.1),
     colorbar_kw={"ticklen": 0, "ticklabelsize": 5, "width": 0.11, "label": ""},
 )
-axs[0].contour(pre_RR, c = "black", vmin = 5, vmax = 5, lw = 1.0)
+axs[0].contour(pre_RR, c="black", vmin=5, vmax=5, lw=1.0)
 n = 1
-plt_sig(preivpv, axs[0], n, np.where(preivpv[::n, ::]  < 0.05))
+plt_sig(preivpv, axs[0], n, np.where(preivpv[::n, ::] < 0.05))
 
-fig.format(suptitle="linear trend", abcloc="l", abc="a)")
+fig4.format(suptitle="linear trend", abcloc="l", abc="a)")
 # %%
 #   calculate SST linear tendency in different month
 SSTiv = p_month(hadisst, 1, 12)
 year = np.arange(1979, 2021, 1)
-SSTiv.coords['time'] = year
+SSTiv.coords["time"] = year
 sstivsl, sstivin, sstivrv, sstivpv, sstivhy = dim_linregress(year, SSTiv)
+print(sstivrv)
+# %%
+#   plot the SST linear tendency
+pplt.rc.grid = False
+pplt.rc.reso = "lo"
 
+proj = pplt.PlateCarree()
+
+# array = [[1, 1, 2, 2], [3, 3, 4, 4], [0, 5, 5, 0]]
+fig5 = pplt.figure(span=False, share=False)
+axs = fig5.subplots(ncols=3, nrows=4, proj=proj, wspace=4.0, hspace=4.0)
+
+xticks = np.array([40, 60, 80, 100, 120])
+yticks = np.array([0, 10, 20, 30, 40])
+axs.format(
+    coast=True, coastlinewidth=0.8, lonlim=(40, 120), latlim=(0, 40), coastzorder=1
+)
+axs.set_xticks(xticks)
+axs.set_yticks(yticks)
+lon_formatter = LongitudeFormatter(zero_direction_label=True)
+lat_formatter = LatitudeFormatter()
+axs.minorticks_on()
+xminorLocator = MultipleLocator(5)
+yminorLocator = MultipleLocator(10)
+
+for i, ax in enumerate(axs):
+    ax.xaxis.set_major_formatter(lon_formatter)
+    ax.yaxis.set_major_formatter(lat_formatter)
+    ax.xaxis.set_minor_locator(xminorLocator)
+    ax.yaxis.set_minor_locator(yminorLocator)
+    ax.outline_patch.set_linewidth(1.0)
+    ax.tick_params(
+        axis="both",
+        which="major",
+        labelsize=8,
+        direction="out",
+        length=4.0,
+        width=0.8,
+        pad=2.0,
+        top=False,
+        right=False,
+    )
+    ax.tick_params(
+        axis="both",
+        which="minor",
+        direction="out",
+        length=3.0,
+        width=0.8,
+        top=False,
+        right=False,
+    )
+    m = ax.contourf(sstivrv[i, :, :], cmap="ColdHot", levels=np.arange(-1.0, 1.1, 0.1))
+    n = 1
+    plt_sig(sstivpv, ax, n, np.where(sstivpv[i, ::n, ::] < 0.05))
+w, h = 0.12, 0.14
+
+
+# axs[0].contour(pre_RR, c = "black", vmin = 5, vmax = 5, lw = 1.0)
+fig5.colorbar(m, ticklen=0, ticklabelsize=5, width=0.11, label="", loc="b")
+fig5.format(suptitle="SST linear trend", abcloc="l", abc="a)")
 # %%
