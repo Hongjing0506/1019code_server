@@ -26,6 +26,7 @@ from cartopy.mpl.ticker import LatitudeFormatter
 from matplotlib.ticker import MultipleLocator
 from matplotlib.patches import Rectangle
 import matplotlib.pyplot as plt
+from scipy import stats
 
 """
 description: 
@@ -175,6 +176,19 @@ def detrend_dim(da, dim, deg, trend):
         return da - fit
     elif trend == True:
         return fit
+
+
+def dim_linregress(x, y):
+    # returns: slope,intercept,rvalue,pvalue,hypothesis
+    return xr.apply_ufunc(
+        stats.linregress,
+        x,
+        y,
+        input_core_dims=[["time"], ["time"]],
+        output_core_dims=[[], [], [], [], []],
+        vectorize=True,
+        dask="parallelized",
+    )
 
 
 # %%
@@ -546,28 +560,48 @@ fig.format(suptitle="hgt & wind in 200hPa", abcloc="l", abc="a)")
 IOSMiv = p_month(IOSM_pre, 6, 7).mean(dim=["month", "lat", "lon"], skipna=True)
 print(IOSMiv)
 ISMiv = p_month(ISM_pre, 6, 9).mean(dim=["month", "lat", "lon"], skipna=True)
+year = np.arange(1979, 2021, 1)
+IOSMiv.coords["time"] = year
+ISMiv.coords["time"] = year
+IOSMivtrend = IOSMiv.polyfit(dim="time", deg=1, skipna=True, full=True)
 
-IOSMivtrend = IOSMiv.polyfit(dim = "time", deg = 1, skipna = True, full = True)
 print(IOSMivtrend.polyfit_coefficients)
-print(IOSMivtrend.polyfit_residuals)
+# print(IOSMivtrend.polyfit_residuals)
 
-ISMivtrend = ISMiv.polyfit(dim = "time", deg = 1, skipna = True, full = True)
-print(ISMivtrend.polyfit_coefficients)
-print(ISMivtrend.polyfit_residuals)
+ISMivtrend = ISMiv.polyfit(dim="time", deg=1, skipna=True, full=True)
+# print(ISMivtrend.polyfit_coefficients)
+# print(ISMivtrend.polyfit_residuals)
+
+IOSMivtrend1 = dim_linregress(np.arange(1979, 2021, 1), IOSMiv)
+print(IOSMivtrend1[0])
 # %%
 #   plot the interannual variation and linear trend
-fig3 = pplt.figure(span=False, share = False, refwidth=4.0)
-axs = fig3.subplots(ncols = 1, nrows = 1)
-axs[0].plot(IOSMiv, color = "red", zorder = 1)
-axs[0].plot(ISMiv, color = "blue", zorder = 2)
-axs[0].format(ylim = (4, 10), ylabel = "mm/day", grid = False, ytickminor = False, xtickminor = True, titleloc = "l", title = "interannual variability")
+fig3 = pplt.figure(span=False, share=False, refwidth=4.0)
+axs = fig3.subplots(ncols=1, nrows=1)
+axs[0].plot(IOSMiv, color="red", zorder=1)
+axs[0].plot(ISMiv, color="blue", zorder=2)
+axs[0].format(
+    ylim=(4, 10),
+    ylabel="mm/day",
+    grid=False,
+    ytickminor=False,
+    xtickminor=True,
+    titleloc="l",
+    title="interannual variability",
+)
 
 # %%
 #   calculate interannual linear trend map
-preiv = p_month(pre, 5, 9).mean(dim = "month", skipna = True)
-preivtrend = preiv.polyfit(dim="time", deg = 1, skipna = True, full = True)
-print(preivtrend)
+preiv = p_month(pre, 5, 9).mean(dim="month", skipna=True)
+year = np.arange(1979, 2021, 1)
+preiv.coords["time"] = year
+# print(preiv)
+preivtrend = preiv.polyfit(dim="time", deg=1, skipna=True, full=True)
 
+print(preivtrend.polyfit_coefficients)
+# preivslope = dim_linregress(np.arange(1979, 2021, 1), preiv)
+preivsl, preivin, preivrv, preivpc, preivhy = dim_linregress(year, preiv)
+print(preivsl)
 
 # %%
 #   plot linear trend map
@@ -578,7 +612,7 @@ proj = pplt.PlateCarree()
 
 # array = [[1, 1, 2, 2], [3, 3, 4, 4], [0, 5, 5, 0]]
 fig4 = pplt.figure(span=False, share=False)
-axs = fig4.subplots(ncols = 1, nrows = 1, proj=proj, wspace=4.0, hspace=4.0)
+axs = fig4.subplots(ncols=1, nrows=1, proj=proj, wspace=4.0, hspace=4.0)
 
 xticks = np.array([40, 60, 80, 100, 120])
 yticks = np.array([0, 10, 20, 30, 40])
@@ -621,7 +655,13 @@ for ax in axs:
     )
 
 w, h = 0.12, 0.14
-m = axs[0].contourf(preivtrend["polyfit_coefficients"].loc[1, :, :], cmap = "ColdHot", colorbar = "b", colorbar_kw = {"ticklen": 0, "ticklabelsize": 5, "width": 0.11, "label": ""})
+m = axs[0].contourf(
+    preivtrend["polyfit_coefficients"].loc[1, :, :],
+    cmap="ColdHot",
+    colorbar="b",
+    colorbar_kw={"ticklen": 0, "ticklabelsize": 5, "width": 0.11, "label": ""},
+)
 
 fig.format(suptitle="linear trend", abcloc="l", abc="a)")
+# %%
 # %%
