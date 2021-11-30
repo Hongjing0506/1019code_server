@@ -23,6 +23,7 @@ import cartopy.crs as ccrs
 import cartopy.feature as cfeature
 from cartopy.mpl.ticker import LongitudeFormatter
 from cartopy.mpl.ticker import LatitudeFormatter
+from cartopy.util import add_cyclic_point
 from matplotlib.ticker import MultipleLocator
 from matplotlib.patches import Rectangle
 import matplotlib.pyplot as plt
@@ -190,6 +191,12 @@ def dim_linregress(x, y):
         dask="parallelized",
     )
 
+def plt_sig(da, ax, n, area):
+    da_cyc, lon_cyc = add_cyclic_point(da[::n, ::n], coord=da.lon[::n])
+    nx, ny = np.meshgrid(lon_cyc, da.lat[::n])
+    sig = ax.scatter(
+        nx[area], ny[area], marker='.', s=9, c='black', alpha=0.6, transform=proj
+    )
 
 # %%
 # 读取数据
@@ -224,6 +231,8 @@ hgt = hgt / 9.80665
 hgt850 = hgt.loc[:, 850, :, :]
 hgt200 = hgt.loc[:, 200, :, :]
 
+fhadisst = xr.open_dataset(ch + "/home/ys17-23/chenhj/monsoon/pyear/HadISST_r144x72_1979-2020.nc")
+hadisst = fhadisst["sst"]
 # %%
 #   calculate monsoon area
 pre_ac = p_month(pre, 1, 12).mean(dim="time")
@@ -235,12 +244,12 @@ pre_RR = pre_max - pre_Jan
 # %%
 #   Indian Ocean monsoon area
 ma = pre.where(pre_RR > 5.00)
-IOSM_pre = lsmask(ma, lmask, "ocean").loc[:, 0:30, 60:80]
+IOSM_pre = lsmask(ma, lmask, "ocean").loc[:, 0:30, 60:70]
 # IOSM_pre = lsmask(ma, lmask, "ocean").loc[:, 0:25, 65:75]
 ISM_pre = lsmask(ma, lmask, "land").loc[:, 0:30, 70:87]
 
 uma = u850.where(pre_RR > 5.00)
-IOSM_u = lsmask(uma, lmask, "ocean").loc[:, 0:30, 60:80]
+IOSM_u = lsmask(uma, lmask, "ocean").loc[:, 0:30, 60:70]
 ISM_u = lsmask(uma, lmask, "land").loc[:, 0:30, 70:87]
 
 
@@ -557,7 +566,7 @@ fig.format(suptitle="hgt & wind in 200hPa", abcloc="l", abc="a)")
 
 # %%
 #  calculate interannual variation and linear trend
-IOSMiv = p_month(IOSM_pre, 6, 7).mean(dim=["month", "lat", "lon"], skipna=True)
+IOSMiv = p_month(IOSM_pre, 5, 9).mean(dim=["month", "lat", "lon"], skipna=True)
 IOSMivstd = IOSMiv.std()
 ISMiv = p_month(ISM_pre, 6, 9).mean(dim=["month", "lat", "lon"], skipna=True)
 ISMivstd = ISMiv.std()
@@ -616,8 +625,8 @@ preivtrend = preiv.polyfit(dim="time", deg=1, skipna=True, full=True)
 
 print(preivtrend.polyfit_coefficients)
 # preivslope = dim_linregress(np.arange(1979, 2021, 1), preiv)
-preivsl, preivin, preivrv, preivpc, preivhy = dim_linregress(year, preiv)
-print(preivsl)
+preivsl, preivin, preivrv, preivpv, preivhy = dim_linregress(year, preiv)
+print(preivpv)
 
 # %%
 #   plot linear trend map
@@ -675,9 +684,19 @@ m = axs[0].contourf(
     preivrv,
     cmap="ColdHot",
     colorbar="b",
+    levels = np.arange(-1.0, 1.1, 0.1),
     colorbar_kw={"ticklen": 0, "ticklabelsize": 5, "width": 0.11, "label": ""},
 )
+axs[0].contour(pre_RR, c = "black", vmin = 5, vmax = 5, lw = 1.0)
+n = 1
+plt_sig(preivpv, axs[0], n, np.where(preivpv[::n, ::]  < 0.05))
 
 fig.format(suptitle="linear trend", abcloc="l", abc="a)")
 # %%
+#   calculate SST linear tendency in different month
+SSTiv = p_month(hadisst, 1, 12)
+year = np.arange(1979, 2021, 1)
+SSTiv.coords['time'] = year
+sstivsl, sstivin, sstivrv, sstivpv, sstivhy = dim_linregress(year, SSTiv)
+
 # %%
