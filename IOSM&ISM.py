@@ -238,7 +238,12 @@ fhadisst = xr.open_dataset(
 )
 hadisst = fhadisst["sst"]
 
-
+fersst = xr.open_dataset(
+    ch + "/home/ys17-23/chenhj/monsoon/pyear/ERSSTv5_r144x72_1979-2020.nc"
+)
+ersst = fersst["sst"].loc[:, 0.0, :, :]
+ersst["time"] = hadisst["time"]
+print(ersst)
 # %%
 #   calculate monsoon area
 pre_ac = p_month(pre, 1, 12).mean(dim="time")
@@ -700,7 +705,7 @@ plt_sig(preivpv, axs[0], n, np.where(preivpv[::n, ::] < 0.05))
 fig4.format(suptitle="linear trend", abcloc="l", abc="a)")
 # %%
 #   calculate SST linear tendency in different month
-SSTiv = p_month(hadisst, 1, 12)
+SSTiv = p_month(ersst, 1, 12)
 year = np.arange(1979, 2021, 1)
 SSTiv.coords["time"] = year
 sstivsl, sstivin, sstivrv, sstivpv, sstivhy = dim_linregress(year, SSTiv)
