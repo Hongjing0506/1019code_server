@@ -558,22 +558,37 @@ fig.format(suptitle="hgt & wind in 200hPa", abcloc="l", abc="a)")
 # %%
 #  calculate interannual variation and linear trend
 IOSMiv = p_month(IOSM_pre, 6, 7).mean(dim=["month", "lat", "lon"], skipna=True)
-print(IOSMiv)
+IOSMivstd = IOSMiv.std()
 ISMiv = p_month(ISM_pre, 6, 9).mean(dim=["month", "lat", "lon"], skipna=True)
+ISMivstd = ISMiv.std()
 year = np.arange(1979, 2021, 1)
+st = np.std(year)
 IOSMiv.coords["time"] = year
 ISMiv.coords["time"] = year
-IOSMivtrend = IOSMiv.polyfit(dim="time", deg=1, skipna=True, full=True)
+IOSMivtrend = IOSMiv.polyfit(
+    dim="time", deg=1, skipna=True, full=True
+).polyfit_coefficients.loc[1]
+IOSMivb = IOSMiv.polyfit(
+    dim="time", deg=1, skipna=True, full=True
+).polyfit_coefficients.loc[0]
 
-print(IOSMivtrend.polyfit_coefficients)
-# print(IOSMivtrend.polyfit_residuals)
+IOSMivr = IOSMivtrend * st / IOSMivstd
 
-ISMivtrend = ISMiv.polyfit(dim="time", deg=1, skipna=True, full=True)
-# print(ISMivtrend.polyfit_coefficients)
-# print(ISMivtrend.polyfit_residuals)
+ISMivtrend = ISMiv.polyfit(
+    dim="time", deg=1, skipna=True, full=True
+).polyfit_coefficients.loc[1]
+ISMivb = ISMiv.polyfit(
+    dim="time", deg=1, skipna=True, full=True
+).polyfit_coefficients.loc[0]
 
-IOSMivtrend1 = dim_linregress(np.arange(1979, 2021, 1), IOSMiv)
-print(IOSMivtrend1[0])
+ISMivr = ISMivtrend * st / ISMivstd
+
+print("IOSMivtrend = ", IOSMivtrend, "\n ISMivtrend = ", ISMivtrend)
+print("IOSMivr = ", IOSMivr, "\n ISMivr = ", ISMivr)
+
+#   another way to calculate linear trend
+# IOSMivtrend1 = dim_linregress(np.arange(1979, 2021, 1), IOSMiv)
+# print(IOSMivtrend1[0])
 # %%
 #   plot the interannual variation and linear trend
 fig3 = pplt.figure(span=False, share=False, refwidth=4.0)
@@ -592,6 +607,7 @@ axs[0].format(
 
 # %%
 #   calculate interannual linear trend map
+# r_lim in 95% is 0.3042 
 preiv = p_month(pre, 5, 9).mean(dim="month", skipna=True)
 year = np.arange(1979, 2021, 1)
 preiv.coords["time"] = year
@@ -656,7 +672,7 @@ for ax in axs:
 
 w, h = 0.12, 0.14
 m = axs[0].contourf(
-    preivtrend["polyfit_coefficients"].loc[1, :, :],
+    preivrv,
     cmap="ColdHot",
     colorbar="b",
     colorbar_kw={"ticklen": 0, "ticklabelsize": 5, "width": 0.11, "label": ""},
