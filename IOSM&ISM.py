@@ -233,6 +233,12 @@ hgt = hgt / 9.80665
 hgt850 = hgt.loc[:, 850, :, :]
 hgt200 = hgt.loc[:, 200, :, :]
 
+fomega = xr.open_dataset(
+    ch + "/home/ys17-23/chenhj/monsoon/pyear/ERA5omega_r144x72_1979-2020.nc"
+)
+omega = fomega["w"]
+omega500 = omega.loc[:, 500, :, :]
+
 fhadisst = xr.open_dataset(
     ch + "/home/ys17-23/chenhj/monsoon/pyear/HadISST_r144x72_1979-2020.nc"
 )
@@ -671,6 +677,12 @@ u200ivsl, u200ivin, u200ivrv, u200ivpv, u200ivhy = dim_linregress(year, u200iv)
 v200iv = p_month(v200, startmon, endmon).mean(dim="month", skipna=True)
 v200iv.coords["time"] = year
 v200ivsl, v200ivin, v200ivrv, v200ivpv, v200ivhy = dim_linregress(year, v200iv)
+
+omega500iv = p_month(omega500, startmon, endmon).mean(dim="month", skipna=True)
+omega500iv.coords["time"] = year
+omega500ivsl, omega500ivin, omega500ivrv, omega500ivpv, omega500ivhy = dim_linregress(
+    year, omega500iv
+)
 # %%
 #   plot linear trend map
 pplt.rc.grid = False
@@ -721,18 +733,28 @@ for ax in axs:
         top=False,
         right=False,
     )
+    if i == 1 or i == 2:
+        w, h = 0.12, 0.14
+        rect = Rectangle(
+            (1 - w, 0),
+            w,
+            h,
+            transform=ax.transAxes,
+            fc="white",
+            ec="k",
+            lw=0.5,
+            zorder=1.1,
+        )
+        ax.add_patch(rect)
 
 m = axs[0].contourf(preivrv, cmap="ColdHot", levels=np.arange(-1.0, 1.1, 0.1))
 axs[0].contour(pre_RR, c="black", vmin=5, vmax=5, lw=1.0)
 n = 1
 plt_sig(preivpv, axs[0], n, np.where(preivpv[::n, ::] <= 0.05))
-axs[0].format(ltitle = "precip")
+axs[0].format(ltitle="precip")
 
-w, h = 0.12, 0.14
-rect = Rectangle(
-    (1 - w, 0), w, h, transform=axs[1].transAxes, fc="white", ec="k", lw=0.5, zorder=1.1
-)
-axs[1].contourf(hgt850ivrv, cmap="ColdHot", levels=np.arange(-1.0, 1.1, 0.1), zorder = 0)
+
+axs[1].contourf(hgt850ivrv, cmap="ColdHot", levels=np.arange(-1.0, 1.1, 0.1), zorder=0)
 axs[1].contour(
     hgt850ivpv, color="green", vmin=0.05, vmax=0.05, zorder=0.5, linewidth=0.5
 )
@@ -744,7 +766,7 @@ qu = axs[1].quiver(
     scale_units="xy",
     scale=0.3,
     pivot="mid",
-    minlength=1.0
+    minlength=1.0,
 )
 axs[1].quiver(
     u850ivrv,
@@ -755,9 +777,9 @@ axs[1].quiver(
     scale=0.3,
     pivot="mid",
     minlength=1.0,
-    color = "grey"
+    color="grey",
 )
-axs[1].add_patch(rect)
+
 qk = axs[1].quiverkey(
     qu,
     X=1 - w / 2,
@@ -769,10 +791,55 @@ qk = axs[1].quiverkey(
     fontproperties={"size": 5},
     zorder=3.1,
 )
-axs[1].format(ltitle = "hgt and wind", rtitle = "850hPa")
+axs[1].format(ltitle="hgt and wind", rtitle="850hPa")
+
+axs[2].contourf(hgt200ivrv, cmap="ColdHot", levels=np.arange(-1.0, 1.1, 0.1), zorder=0)
+axs[2].contour(
+    hgt200ivpv, color="green", vmin=0.05, vmax=0.05, zorder=0.5, linewidth=0.5
+)
+qu = axs[2].quiver(
+    u200ivrv.where(u200ivpv <= 0.05),
+    v200ivrv.where(v200ivpv <= 0.05),
+    zorder=1,
+    headwidth=4,
+    scale_units="xy",
+    scale=0.3,
+    pivot="mid",
+    minlength=1.0,
+)
+axs[2].quiver(
+    u200ivrv,
+    v200ivrv,
+    zorder=0.8,
+    headwidth=4,
+    scale_units="xy",
+    scale=0.3,
+    pivot="mid",
+    minlength=1.0,
+    color="grey",
+)
+
+qk = axs[2].quiverkey(
+    qu,
+    X=1 - w / 2,
+    Y=0.7 * h,
+    U=1,
+    label="1 m/s",
+    labelpos="S",
+    labelsep=0.02,
+    fontproperties={"size": 5},
+    zorder=3.1,
+)
+axs[2].format(ltitle="hgt and wind", rtitle="200hPa")
+
+axs[3].contourf(
+    omega500ivrv, cmap="ColdHot", levels=np.arange(-1.0, 1.1, 0.1), zorder=0
+)
+axs[3].format(ltitle="omega", rtitle="500hPa")
+plt_sig(omega500ivpv, axs[3], n, np.where(omega500ivpv[::n, ::] <= 0.05))
 
 fig4.colorbar(m, loc="b", ticklen=0, ticklabelsize=5, width=0.11, label="")
-fig4.format(suptitle="linear trend", abcloc="l", abc="a)")
+fig4.format(suptitle="May-Sep linear trend", abcloc="l", abc="a)")
 # %%
 #   calculate SST linear tendency in different month
 SSTiv = p_month(ersst, 1, 12)
