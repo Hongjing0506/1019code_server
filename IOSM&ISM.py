@@ -255,12 +255,12 @@ pre_RR = pre_max - pre_Jan
 # %%
 #   Indian Ocean monsoon area
 ma = pre.where(pre_RR > 5.00)
-IOSM_pre = lsmask(ma, lmask, "ocean").loc[:, 0:30, 60:70]
+IOSM_pre = lsmask(ma, lmask, "ocean").loc[:, 0:30, 60:80]
 # IOSM_pre = lsmask(ma, lmask, "ocean").loc[:, 0:25, 65:75]
 ISM_pre = lsmask(ma, lmask, "land").loc[:, 0:30, 70:87]
 
 uma = u850.where(pre_RR > 5.00)
-IOSM_u = lsmask(uma, lmask, "ocean").loc[:, 0:30, 60:70]
+IOSM_u = lsmask(uma, lmask, "ocean").loc[:, 0:30, 60:80]
 ISM_u = lsmask(uma, lmask, "land").loc[:, 0:30, 70:87]
 
 
@@ -577,7 +577,7 @@ fig.format(suptitle="hgt & wind in 200hPa", abcloc="l", abc="a)")
 
 # %%
 #  calculate interannual variation and linear trend
-IOSMiv = p_month(IOSM_pre, 5, 9).mean(dim=["month", "lat", "lon"], skipna=True)
+IOSMiv = p_month(IOSM_pre, 6, 7).mean(dim=["month", "lat", "lon"], skipna=True)
 IOSMivstd = IOSMiv.std()
 ISMiv = p_month(ISM_pre, 6, 9).mean(dim=["month", "lat", "lon"], skipna=True)
 ISMivstd = ISMiv.std()
@@ -628,17 +628,49 @@ axs[0].format(
 # %%
 #   calculate interannual linear trend map
 # r_lim in 95% is 0.3042
-preiv = p_month(pre, 5, 9).mean(dim="month", skipna=True)
+startmon = 5
+endmon = 9
+preiv = p_month(pre, startmon, endmon).mean(dim="month", skipna=True)
 year = np.arange(1979, 2021, 1)
 preiv.coords["time"] = year
 # print(preiv)
-preivtrend = preiv.polyfit(dim="time", deg=1, skipna=True, full=True)
 
-print(preivtrend.polyfit_coefficients)
+#   another calculation way: xarray.polyfit
+# preivtrend = preiv.polyfit(dim="time", deg=1, skipna=True, full=True)
+
 # preivslope = dim_linregress(np.arange(1979, 2021, 1), preiv)
+# print(preivslope[0])
 preivsl, preivin, preivrv, preivpv, preivhy = dim_linregress(year, preiv)
 print(preivpv)
 
+#  calculate hgt & wind linear trend
+hgt850iv = p_month(hgt850, startmon, endmon).mean(dim="month", skipna=True)
+hgt850iv.coords["time"] = year
+hgt850ivsl, hgt850ivin, hgt850ivrv, hgt850ivpv, hgt850ivhy = dim_linregress(
+    year, hgt850iv
+)
+
+u850iv = p_month(u850, startmon, endmon).mean(dim="month", skipna=True)
+u850iv.coords["time"] = year
+u850ivsl, u850ivin, u850ivrv, u850ivpv, u850ivhy = dim_linregress(year, u850iv)
+
+v850iv = p_month(v850, startmon, endmon).mean(dim="month", skipna=True)
+v850iv.coords["time"] = year
+v850ivsl, v850ivin, v850ivrv, v850ivpv, v850ivhy = dim_linregress(year, v850iv)
+
+hgt200iv = p_month(hgt200, startmon, endmon).mean(dim="month", skipna=True)
+hgt200iv.coords["time"] = year
+hgt200ivsl, hgt200ivin, hgt200ivrv, hgt200ivpv, hgt200ivhy = dim_linregress(
+    year, hgt200iv
+)
+
+u200iv = p_month(u200, startmon, endmon).mean(dim="month", skipna=True)
+u200iv.coords["time"] = year
+u200ivsl, u200ivin, u200ivrv, u200ivpv, u200ivhy = dim_linregress(year, u200iv)
+
+v200iv = p_month(v200, startmon, endmon).mean(dim="month", skipna=True)
+v200iv.coords["time"] = year
+v200ivsl, v200ivin, v200ivrv, v200ivpv, v200ivhy = dim_linregress(year, v200iv)
 # %%
 #   plot linear trend map
 pplt.rc.grid = False
@@ -648,7 +680,7 @@ proj = pplt.PlateCarree()
 
 # array = [[1, 1, 2, 2], [3, 3, 4, 4], [0, 5, 5, 0]]
 fig4 = pplt.figure(span=False, share=False)
-axs = fig4.subplots(ncols=1, nrows=1, proj=proj, wspace=4.0, hspace=4.0)
+axs = fig4.subplots(ncols=2, nrows=2, proj=proj, wspace=4.0, hspace=4.0)
 
 xticks = np.array([40, 60, 80, 100, 120])
 yticks = np.array([0, 10, 20, 30, 40])
@@ -690,18 +722,56 @@ for ax in axs:
         right=False,
     )
 
-w, h = 0.12, 0.14
-m = axs[0].contourf(
-    preivrv,
-    cmap="ColdHot",
-    colorbar="b",
-    levels=np.arange(-1.0, 1.1, 0.1),
-    colorbar_kw={"ticklen": 0, "ticklabelsize": 5, "width": 0.11, "label": ""},
-)
+m = axs[0].contourf(preivrv, cmap="ColdHot", levels=np.arange(-1.0, 1.1, 0.1))
 axs[0].contour(pre_RR, c="black", vmin=5, vmax=5, lw=1.0)
 n = 1
-plt_sig(preivpv, axs[0], n, np.where(preivpv[::n, ::] < 0.05))
+plt_sig(preivpv, axs[0], n, np.where(preivpv[::n, ::] <= 0.05))
+axs[0].format(ltitle = "precip")
 
+w, h = 0.12, 0.14
+rect = Rectangle(
+    (1 - w, 0), w, h, transform=axs[1].transAxes, fc="white", ec="k", lw=0.5, zorder=1.1
+)
+axs[1].contourf(hgt850ivrv, cmap="ColdHot", levels=np.arange(-1.0, 1.1, 0.1), zorder = 0)
+axs[1].contour(
+    hgt850ivpv, color="green", vmin=0.05, vmax=0.05, zorder=0.5, linewidth=0.5
+)
+qu = axs[1].quiver(
+    u850ivrv.where(u850ivpv <= 0.05),
+    v850ivrv.where(v850ivpv <= 0.05),
+    zorder=1,
+    headwidth=4,
+    scale_units="xy",
+    scale=0.3,
+    pivot="mid",
+    minlength=1.0
+)
+axs[1].quiver(
+    u850ivrv,
+    v850ivrv,
+    zorder=0.8,
+    headwidth=4,
+    scale_units="xy",
+    scale=0.3,
+    pivot="mid",
+    minlength=1.0,
+    color = "grey"
+)
+axs[1].add_patch(rect)
+qk = axs[1].quiverkey(
+    qu,
+    X=1 - w / 2,
+    Y=0.7 * h,
+    U=1,
+    label="1 m/s",
+    labelpos="S",
+    labelsep=0.02,
+    fontproperties={"size": 5},
+    zorder=3.1,
+)
+axs[1].format(ltitle = "hgt and wind", rtitle = "850hPa")
+
+fig4.colorbar(m, loc="b", ticklen=0, ticklabelsize=5, width=0.11, label="")
 fig4.format(suptitle="linear trend", abcloc="l", abc="a)")
 # %%
 #   calculate SST linear tendency in different month
@@ -734,6 +804,20 @@ axs.minorticks_on()
 xminorLocator = MultipleLocator(5)
 yminorLocator = MultipleLocator(10)
 
+month = [
+    "JAN",
+    "FEB",
+    "MAR",
+    "APR",
+    "MAY",
+    "JUN",
+    "JUL",
+    "AUG",
+    "SEP",
+    "OBT",
+    "NOV",
+    "DEC",
+]
 for i, ax in enumerate(axs):
     ax.xaxis.set_major_formatter(lon_formatter)
     ax.yaxis.set_major_formatter(lat_formatter)
@@ -763,6 +847,7 @@ for i, ax in enumerate(axs):
     m = ax.contourf(sstivrv[i, :, :], cmap="ColdHot", levels=np.arange(-1.0, 1.1, 0.1))
     n = 1
     plt_sig(sstivpv, ax, n, np.where(sstivpv[i, ::n, ::] < 0.05))
+    ax.format(titleloc="l", title=month[i])
 w, h = 0.12, 0.14
 
 
@@ -770,3 +855,14 @@ w, h = 0.12, 0.14
 fig5.colorbar(m, ticklen=0, ticklabelsize=5, width=0.11, label="", loc="b")
 fig5.format(suptitle="SST linear trend", abcloc="l", abc="a)")
 # %%
+#   calculate hgt, wind linear trend
+preiv = p_month(pre, 6, 7).mean(dim="month", skipna=True)
+year = np.arange(1979, 2021, 1)
+preiv.coords["time"] = year
+# print(preiv)
+preivtrend = preiv.polyfit(dim="time", deg=1, skipna=True, full=True)
+
+print(preivtrend.polyfit_coefficients)
+# preivslope = dim_linregress(np.arange(1979, 2021, 1), preiv)
+preivsl, preivin, preivrv, preivpv, preivhy = dim_linregress(year, preiv)
+print(preivpv)
