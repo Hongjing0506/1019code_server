@@ -200,6 +200,12 @@ def plt_sig(da, ax, n, area):
     )
 
 
+def standardize(da):
+    mean = da.mean(dim="time", skipna=True)
+    std = da.std(dim="time", skipna=True)
+    return (da - mean) / std
+
+
 # %%
 # 读取数据
 
@@ -583,7 +589,7 @@ fig.format(suptitle="hgt & wind in 200hPa", abcloc="l", abc="a)")
 
 # %%
 #  calculate interannual variation and linear trend
-IOSMiv = p_month(IOSM_pre, 6, 7).mean(dim=["month", "lat", "lon"], skipna=True)
+IOSMiv = p_month(IOSM_pre, 5, 9).mean(dim=["month", "lat", "lon"], skipna=True)
 IOSMivstd = IOSMiv.std()
 ISMiv = p_month(ISM_pre, 6, 9).mean(dim=["month", "lat", "lon"], skipna=True)
 ISMivstd = ISMiv.std()
@@ -629,6 +635,16 @@ axs[0].format(
     xtickminor=True,
     titleloc="l",
     title="interannual variability",
+)
+axs[0].legend(
+    labels=["IOSM", "ISM"],
+    lw=0.6,
+    loc="ur",
+    ncols=1,
+    markersize=2.5,
+    fontsize=0.5,
+    frame=False,
+    pad=0.5,
 )
 
 # %%
@@ -847,6 +863,7 @@ year = np.arange(1979, 2021, 1)
 SSTiv.coords["time"] = year
 sstivsl, sstivin, sstivrv, sstivpv, sstivhy = dim_linregress(year, SSTiv)
 print(sstivrv)
+
 # %%
 #   plot the SST linear tendency
 pplt.rc.grid = False
@@ -922,14 +939,14 @@ w, h = 0.12, 0.14
 fig5.colorbar(m, ticklen=0, ticklabelsize=5, width=0.11, label="", loc="b")
 fig5.format(suptitle="SST linear trend", abcloc="l", abc="a)")
 # %%
-#   calculate hgt, wind linear trend
-preiv = p_month(pre, 6, 7).mean(dim="month", skipna=True)
-year = np.arange(1979, 2021, 1)
-preiv.coords["time"] = year
-# print(preiv)
-preivtrend = preiv.polyfit(dim="time", deg=1, skipna=True, full=True)
+#   calculate normalized data
+pre_0 = standardize(pre)
+u850_0 = standardize(u850)
+v850_0 = standardize(v850)
+print(pre_0)
+#   combined the normalized data into one variable
 
-print(preivtrend.polyfit_coefficients)
-# preivslope = dim_linregress(np.arange(1979, 2021, 1), preiv)
-preivsl, preivin, preivrv, preivpv, preivhy = dim_linregress(year, preiv)
-print(preivpv)
+
+# %%
+print(pre.time.dtype)
+# %%
